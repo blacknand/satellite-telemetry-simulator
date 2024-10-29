@@ -7,6 +7,9 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
+// Local files
+#include "bme280.h"
+
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -23,14 +26,11 @@ unsigned long delayTime;
 void setup() {
     Serial.begin(9600);
     while(!Serial);    
-    Serial.println(F("BME280 test"));
+    Serial.println(F("BME280 initialisation"));
 
     unsigned status;
     
-    // default settings
     status = bme.begin();       // In case of sensor error, try address 0x77                                              
-    // You can also pass in a Wire library object like &Wire2
-    // status = bme.begin(0x76, &Wire2)
     if (!status) {
         Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
         Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
@@ -40,9 +40,6 @@ void setup() {
         Serial.print("        ID of 0x61 represents a BME 680.\n");
         while (1) delay(10);
     }
-    
-    Serial.println("-- Default Test --");
-    delayTime = 1000;
 
     Serial.println();
 }
@@ -50,29 +47,44 @@ void setup() {
 
 void loop() { 
     printValues();
-    delay(delayTime);
 }
 
 
 void printValues() {
-    Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
-    Serial.println(" °C");
+    /*
+      * bme.readTemperature()           float
+      * bme.readPressure()              float
+      * bme.readAltitude()              float
+      * bme.readHumidity()              float
+    */
+    std::vector<float> bme_280_results = bme280_values();
+    for (const int& i: bme_280_results) {
+            Serial.print("Temperature: ");
+            Serial.print(bme.readTemperature());      
+            Serial.println("°C");
 
-    Serial.print("Pressure = ");
+            Serial.print("Pressure: ");
 
-    Serial.print(bme.readPressure() / 100.0F);
-    Serial.println(" hPa");
+            Serial.print(bme.readPressure() / 100.0F);
+            Serial.println(" hPa");
 
-    Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-    Serial.println(" m");
+            Serial.print("Approx. Altitude: ");
+            Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+            Serial.println(" m");
 
-    Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
-    Serial.println(" %");
+            Serial.print("Humidity: ");
+            Serial.print(bme.readHumidity());
+            Serial.println("%");
 
-    Serial.println();
+            Serial.println();
+    }
 }
 
-std::vector<>
+std::vector<float> bme280_values() {
+    std::vector<float> bme280_vect;
+    bme280_vect.push_back(bme.readTemperature());
+    bme280_vect.push_back(bme.readPressure());
+    bme280_vect.push_back(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    bme280_vect.push_back(bme.readHumidity());
+    return bme280_vect;
+}
