@@ -1,7 +1,21 @@
-// C++ header files
-#include <vector>
+/***************************************************************************
+  This is a library for the BME280 humidity, temperature & pressure sensor
 
-// BME280 sensor header files
+  Designed specifically to work with the Adafruit BME280 Breakout
+  ----> http://www.adafruit.com/products/2650
+
+  These sensors use I2C or SPI to communicate, 2 or 4 pins are required
+  to interface. The device's I2C address is either 0x76 or 0x77.
+
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit andopen-source hardware by purchasing products
+  from Adafruit!
+
+  Written by Limor Fried & Kevin Townsend for Adafruit Industries.
+  BSD license, all text above must be included in any redistribution
+  See the LICENSE file for details.
+ ***************************************************************************/
+
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
@@ -22,13 +36,21 @@ unsigned long delayTime;
 
 void setup() {
     Serial.begin(9600);
-    while(!Serial);    
+    while(!Serial);    // time to get serial running
     Serial.println(F("BME280 test"));
+
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    for (int i = 0; i < 2; i++) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(100);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(100);
+    }
 
     unsigned status;
     
-    // default settings
-    status = bme.begin();       // In case of sensor error, try address 0x77                                              
+    status = bme.begin(0x77);  
     // You can also pass in a Wire library object like &Wire2
     // status = bme.begin(0x76, &Wire2)
     if (!status) {
@@ -74,5 +96,3 @@ void printValues() {
 
     Serial.println();
 }
-
-std::vector<>
