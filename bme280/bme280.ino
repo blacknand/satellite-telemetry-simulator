@@ -30,7 +30,8 @@ void setup() {
 
     unsigned status;
     
-    status = bme.begin();       // In case of sensor error, try address 0x77                                              
+    status = bme.begin();       // In case of sensor error, try address 0x77 (uint8_t)
+    uint8_t tries = 0;                                            
     if (!status) {
         Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
         Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
@@ -38,6 +39,10 @@ void setup() {
         Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
         Serial.print("        ID of 0x60 represents a BME 280.\n");
         Serial.print("        ID of 0x61 represents a BME 680.\n");
+        Serial.print("Location attempt: ");
+        Serial.println(tries);
+        Serial.print("Retying to locate BME280 sensor...");
+        tries++;
         while (1) delay(10);
     }
 

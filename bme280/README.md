@@ -7,3 +7,11 @@
 | GND        | GND |
 | SCK        | GPIO 5 |
 | SDI | GPIO 4 |
+
+# MPU6050 Pico W sensor wiring
+| MPU6050 pin | Pico W pin |
+| ------- | ------ |
+| VCC   | 3.3V (pin 36) | 
+| GND        | GND (pin 2) |
+| SCK        | GPIO 0 |
+| SDI | GPIO 1 |
