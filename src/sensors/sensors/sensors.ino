@@ -1,30 +1,32 @@
+/*
+  > Integration of both the BME280 and MPU6050 sensors to output in a single sketch
+  > relays the raw data from both sensors
+  > author: nblackburndeveloper@icloud.com; github@blacknand
+*/
+
 #include <vector>
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
-#include <Adafruit_MPU6050.h>
 
 #include "bme280.h"
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
-#define BME_CS 10
+BME280 bme280;
 
-#define SEALEVELPRESSURE_HPA (1013.25)
+/*
+  > Using I2C communication protocol on both the BME280 and MPU6050 sensors
+  > this prevents having to modify both sensors at the firmware level to make them use the same baud rate
+  > meaning the baud rate used here for the serial output is purely for displaying output in the terminal
+*/
 
-Adafruit_BME280 bme; // I2C
-Adafruit_MPU6050 mpu;
-
-unsigned long delay_time;
+// TODO: Now integrate both MPU and BME to work in same sketch
 
 void setup() {
-  // put your setup code here, to run once:
+  Serial.begin(115200);
+  while (!Serial);                            // Wait for serial to initialise before continuing
 
+  bme280.init();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  bme280.output_data();
 }
