@@ -1,16 +1,13 @@
 #include "MPU6050.h"
 
+MPU6050::MPU6050() : WireMPU(&i2c0_inst, 20, 21) {}
+
+
 void MPU6050::init() {
-    uint8_t attempts = 0;
-    Wire.setSDA(20); 
-    Wire.setSCL(21); 
-    if (!mpu.begin(0x68, &Wire, 0)) {
+    WireMPU.begin();
+    if (!mpu.begin(0x68, &WireMPU, 0)) {
         Serial.println("Failed to find MPU6050 chip...");
-        while (1)
-            delay(10);
-        Serial.print("Location attempt: ");
-        Serial.println(attempts);
-        Serial.println("Retrying to locate MPU6050 chip...");
+        while (1) delay(10);
     }
 
     mpu.setAccelerometerRange(MPU6050_RANGE_16_G);

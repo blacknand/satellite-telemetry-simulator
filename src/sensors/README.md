@@ -1,3 +1,9 @@
+## Pico W setup
+- Hold down BOOTSEL button and plug in Pico
+- Choose `Raspberry Pi Pico W` and `UF2_board` port
+- Upload will then fail: `No monitor available for the port protocol uf2conv. Could not connect to UF2_Board uf2conv port.`
+- Now COM port will become available, select it and upload again. The program should now flash correctly
+
 ## MPU6050 Pico W sensor wiring
 | MPU6050 Pin | Pico W Pin          |
 |-------------|---------------------|
