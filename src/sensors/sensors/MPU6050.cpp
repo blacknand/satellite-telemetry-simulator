@@ -1,20 +1,29 @@
 #include "MPU6050.h"
-
-MPU6050::MPU6050() : WireMPU(&i2c0_inst, 20, 21) {}
+#include "I2C_functions.h"
 
 
 void MPU6050::init() {
-    WireMPU.begin();
-    if (!mpu.begin(0x68, &WireMPU, 0)) {
-        Serial.println("Failed to find MPU6050 chip...");
-        while (1) delay(10);
+    int retries = 5; 
+    bool success = false;
+    while (retries > 0 && !success) {
+        if (mpu.begin(0x68, &WireMPU, 0)) {
+            Serial.println("MPU6050 sensor initialized\n");
+            success = true;
+            mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
+            mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+            mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+            Serial.println("MPU6050 sensor initialised");
+            delay(100);
+        } else {
+            Serial.println("Retrying MPU6050 initialization...");
+            delay(500); 
+        }
+        retries--;
     }
-
-    mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
-    mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-    Serial.println("");
-    delay(100);
+    if (!success) {
+        Serial.println("Failed to initialize MPU6050 after retries");
+        while (1) delay(10);            // Halt if it still fails
+    }
 }
 
 

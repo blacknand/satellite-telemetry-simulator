@@ -6,20 +6,28 @@
 
 #include "bme280.h"
 
-Adafruit_BME280 bme; // I2C
+Adafruit_BME280 bme; 
 
 void BME280::init() {
-    unsigned status;
-    Wire.begin();
-    status = bme.begin(0x77, &Wire);       // In case of sensor error, try address 0x77 (uint8_t)
-    if (!status) {
-        Serial.println("Could not find a locate BME280 sensor...");
-        Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
-        while (1) delay(10);
+    unsigned status = 0;
+    int retries = 5;
+    while (retries > 0 && !status) {
+        status = bme.begin(0x77, &Wire);
+        if (status) {
+            Serial.println("BME280 sensor initialized\n");
+            break;
+        } else {
+            Serial.println("Retrying BME280 initialization...");
+            delay(500); 
+        }
+        retries--;
     }
-
-    Serial.println("BME280 initialised");   
+    if (!status) {
+        Serial.println("Failed to initialize BME280 after retries");
+        while (1) delay(10);            // Halt if still fails
+    }
 }
+
 
 
 void BME280::output_data() {

@@ -1,6 +1,6 @@
 // https://learn.adafruit.com/scanning-i2c-addresses/arduino
 
-#include "I2C_scanner.h"
+#include "I2C_functions.h"
 
 void i2c_scanner(TwoWire &wire, const char *name) {
     byte error, address;
@@ -31,4 +31,12 @@ void i2c_scanner(TwoWire &wire, const char *name) {
         Serial.println("I2C scan complete\n");
 
     delay(5000);
+}
+
+
+void reset_i2c_bus() {
+    Wire.end();         // Stop communication on the I2C bus
+    delay(100);         // Wait for the bus to settle
+    Wire.begin();       // Restart the I2C bus
+    delay(100);         // Allow the bus to stabilize
 }
