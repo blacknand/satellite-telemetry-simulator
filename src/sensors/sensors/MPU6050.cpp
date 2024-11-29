@@ -6,7 +6,7 @@ void MPU6050::init() {
     int retries = 5; 
     bool success = false;
     while (retries > 0 && !success) {
-        if (mpu.begin(0x68, &WireMPU, 0)) {
+        if (mpu.begin(0x68, &Wire)) {
             Serial.println("MPU6050 sensor initialized\n");
             success = true;
             mpu.setAccelerometerRange(MPU6050_RANGE_16_G);

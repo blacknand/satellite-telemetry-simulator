@@ -13,11 +13,14 @@ void BME280::init() {
     int retries = 5;
     while (retries > 0 && !status) {
         status = bme.begin(0x77, &Wire);
+        // status = bme.begin();
         if (status) {
             Serial.println("BME280 sensor initialized\n");
             break;
         } else {
-            Serial.println("Retrying BME280 initialization...");
+            Serial.println("bme::begin: ");
+            Serial.print(status);
+            Serial.println("\nRetrying BME280 initialization...");
             delay(500); 
         }
         retries--;

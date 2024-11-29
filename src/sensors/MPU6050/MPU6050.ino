@@ -6,7 +6,6 @@
 #include <Wire.h>
 
 Adafruit_MPU6050 mpu;
-TwoWire WireMPU(i2c0, 20, 21);
 
 void setup(void) {
     Serial.begin(115200);
@@ -14,7 +13,9 @@ void setup(void) {
         delay(10);
     }
 
-    if (!mpu.begin(0x68, &WireMPU, 0)) {
+    Wire.setSDA(20); // Add this
+    Wire.setSCL(21); // Add this
+    if (!mpu.begin(0x68, &Wire, 0)) {
         Serial.println("Failed to find MPU6050 chip");
         while (1) {
             delay(10);
