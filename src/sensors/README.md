@@ -9,8 +9,8 @@
 |-------------|---------------------|
 | VCC         | 3.3V (out) (pin 36) |
 | GND         | GND                 |
-| SCL         | GPIO 21 (pin 27)    |
-| SDA         | GPIO 20 (pin 26)    |
+| SCL         | GPIO 19 (pin 25)    |
+| SDA         | GPIO 18 (pin 24)    |
 
 
 ## BME I2C Pico W wiring

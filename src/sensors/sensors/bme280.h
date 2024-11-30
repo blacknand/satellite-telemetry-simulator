@@ -1,17 +1,20 @@
 #ifndef BME280_SENSOR_H
 #define BME280_SENSOR_H
 
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
-#include <vector>
+
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 class BME280 {
     private:
         Adafruit_BME280 bme;
-        const float sea_level_pressure_hpa = 1008.5;          // https://meteologix.com/uk/model-charts/euro/united-kingdom/sea-level-pressure.html; specifically for east and north east of England 
     public:
         void init();
         void output_data();
-        std::vector<float> bme280_values();
+        void loop_output();
 };
 
 #endif      // BME_280_SENSOR_H
