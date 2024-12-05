@@ -1,5 +1,6 @@
 #include "bme280.h"
 
+BME280Data bme_data;
 
 void BME280::init() {
     Serial.println();
@@ -24,25 +25,26 @@ void BME280::loop_output() {
 
 
 void BME280::output_data() {
+
+    bme_data.temperature = bme.readTemperature();
+    bme_data.pressure = bme.readPressure() / 100.0F;
+    bme_data.altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+    bme_data.humidity = bme.readHumidity();
+
     Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
-    Serial.println(" *C");
-    
-    // Convert temperature to Fahrenheit
-    /*Serial.print("Temperature = ");
-    Serial.print(1.8 * bme.readTemperature() + 32);
-    Serial.println(" *F");*/
+    Serial.print(bme_data.temperature);
+    Serial.println(" *C"); 
     
     Serial.print("Pressure = ");
-    Serial.print(bme.readPressure() / 100.0F);
+    Serial.print(bme_data.pressure);
     Serial.println(" hPa");
     
     Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.print(bme_data.altitude);
     Serial.println(" m");
     
     Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
+    Serial.print(bme_data.humidity);
     Serial.println(" %");
     
     Serial.println();
