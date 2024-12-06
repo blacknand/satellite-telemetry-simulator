@@ -6,7 +6,11 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
+
+#include "../json.hpp"
+
 #define SEALEVELPRESSURE_HPA (1013.25)
+using json = nlohmann::json;
 
 struct BME280Data {
     float temperature;
@@ -24,6 +28,8 @@ class BME280 {
         void init();
         void output_data();
         void loop_output();
+        friend void to_json(json& j, const _data& d);
+        friend void from_json(json& j, const _data& d);
 };
 
 #endif      // BME_280_SENSOR_H

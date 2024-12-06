@@ -1,13 +1,15 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
-//#include <nlohmann/json.hpp>
+
+
+#include "../json.hpp"
 
 // I2C RP2040 pins
 #define SDA 18
 #define SCL 19
 
-//using json = nhlomann::json;
+using json = nhlomann::json;
 
 #ifndef MPU6050_H
 #define MPU6050_H
@@ -30,6 +32,8 @@ class MPU6050 {
     public:
         void init();
         void output_data();
+        friend void to_json(json& j, const _data& d);
+        friend void from_json(json& j, const _data& d);
 };
 
-#endif          // MPU6050_H
+#endif          // MPU6050
