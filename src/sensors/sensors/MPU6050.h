@@ -32,8 +32,8 @@ class MPU6050 {
     public:
         void init();
         void output_data();
-        friend void to_json(json& j, const _data& d);
-        friend void from_json(json& j, const _data& d);
+        friend void to_json(json& j, const mpu_data& d);
+        friend void from_json(json& j, const mpu_data& d);
 };
 
 #endif          // MPU6050

@@ -116,7 +116,7 @@ void MPU6050::output_data() {
 
 
 friend void MPU6050::to_json(json& j, const _data& d) {
-    j = json{
+    j = json {
         {"accel_x", d.accel_x},
         {"accel_y", d.accel_y},
         {"accel_z", d.accel_z},

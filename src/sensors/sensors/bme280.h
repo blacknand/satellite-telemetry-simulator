@@ -28,8 +28,8 @@ class BME280 {
         void init();
         void output_data();
         void loop_output();
-        friend void to_json(json& j, const _data& d);
-        friend void from_json(json& j, const _data& d);
+        friend void to_json(json& j, const bme_data& d);
+        friend void from_json(json& j, const bme_data& d);
 };
 
 #endif      // BME_280_SENSOR_H
