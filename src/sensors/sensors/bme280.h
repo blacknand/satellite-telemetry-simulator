@@ -6,8 +6,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
+#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/json.hpp"
 
-#include "../json.hpp"
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 using json = nlohmann::json;
@@ -28,8 +28,8 @@ class BME280 {
         void init();
         void output_data();
         void loop_output();
-        friend void to_json(json& j, const bme_data& d);
-        friend void from_json(json& j, const bme_data& d);
+        void to_json(json& j, BME280Data& d);
+        void from_json(json& j, BME280Data& d);
 };
 
 #endif      // BME_280_SENSOR_H

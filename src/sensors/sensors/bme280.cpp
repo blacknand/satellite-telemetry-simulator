@@ -51,17 +51,17 @@ void BME280::output_data() {
 }
 
 
-friend void BME280::to_json(json& j, const bme_data& d) {
+void BME280::to_json(json& j, BME280Data& d) {
     j = json {
         {"temperature", d.temperature},
         {"pressure", d.pressure},
         {"altitude", d.altitude},
         {"humidity", d.humidity}
-    }
+    };
 }
 
 
-friend void BME280::from_json(json& j, const bme_data& d) {
+void BME280::from_json(json& j, BME280Data& d) {
     j.at("temperature").get_to(d.temperature);
     j.at("pressure").get_to(d.pressure);
     j.at("altitude").get_to(d.altitude);

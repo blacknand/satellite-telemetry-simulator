@@ -3,10 +3,7 @@
 #include "bme280.h"
 #include "I2C_functions.h"
 
-#include "../json.hpp"
-
 MPU6050Data mpu_data;
-using json = nlohmann::json;
 
 void MPU6050::init() {
     Serial.println("Initialising MPU6050 sensor...");
@@ -115,19 +112,19 @@ void MPU6050::output_data() {
 }
 
 
-friend void MPU6050::to_json(json& j, const _data& d) {
+void MPU6050::to_json(json& j, MPU6050Data& d) {
     j = json {
         {"accel_x", d.accel_x},
         {"accel_y", d.accel_y},
         {"accel_z", d.accel_z},
         {"gyro_x", d.gyro_x},
-        {"gyro_y", d.gryo_y},
+        {"gyro_y", d.gyro_y},
         {"gyro_z", d.gyro_z}
-    }
+    };
 }
 
 
-friend void MPU6050::from_json(json& j, const _data& d) {
+void MPU6050::from_json(json& j, MPU6050Data& d) {
     j.at("accel_x").get_to(d.accel_x);
     j.at("accel_y").get_to(d.accel_y);
     j.at("accel_z").get_to(d.accel_z);

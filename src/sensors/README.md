@@ -4,6 +4,12 @@
 - Upload will then fail: `No monitor available for the port protocol uf2conv. Could not connect to UF2_Board uf2conv port.`
 - Now COM port will become available, select it and upload again. The program should now flash correctly
 
+## Arduino IDE RP2040 setup
+- Find the packages location for the RP2040
+- Create `platform.local.txt`
+- Add `-I` flag to `compiler.cpp.extra_flags=` to include boost library location
+- If you run into relative path issue with nlohmann::json then add `json.hpp` location with `-I` flag
+
 ## MPU6050 Pico W sensor wiring
 | MPU6050 Pin | Pico W Pin          |
 |-------------|---------------------|
