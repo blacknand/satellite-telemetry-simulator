@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <chrono>
 
 #include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/json.hpp"
 
@@ -12,6 +13,7 @@
 using json = nlohmann::json;
 
 struct BME280Data {
+    // std::chrono::time_point;
     float temperature;
     float pressure;
     float altitude;
@@ -28,8 +30,8 @@ class BME280 {
         Adafruit_BME280 bme;
     public:
         void init();
-        void output_data();
-        void loop_output();
+        BME280Data get_data();
+        // void loop_output();
         // void to_json(json& j, BME280Data& d);
         // void from_json(json& j, BME280Data& d);
 };

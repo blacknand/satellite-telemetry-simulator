@@ -32,7 +32,7 @@ class MPU6050 {
         Adafruit_MPU6050 mpu;
     public:
         void init();
-        void output_data();
+        MPU6050Data get_data();
         // void to_json(json& j, MPU6050Data& d);
         // void from_json(json& j, MPU6050Data& d);
 };

@@ -20,36 +20,35 @@ void BME280::init() {
 }
 
 
-void BME280::loop_output() {
-    output_data();
-    // delay(1000);
+// void BME280::loop_output() {
+    // output_data();
+    // // delay(1000);
+// }
+
+
+BME280Data BME280::get_data() {
+    BME280Data d;
+    d.temperature = bme.readTemperature();
+    d.pressure = bme.readPressure() / 100.0F;
+    d.altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+    d.humidity = bme.readHumidity();
+    return d;
 }
 
 
-void BME280::output_data() {
-    bme_data.temperature = bme.readTemperature();
-    bme_data.pressure = bme.readPressure() / 100.0F;
-    bme_data.altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
-    bme_data.humidity = bme.readHumidity();
-    json j = bme_data;
-    Serial.println(j.dump().c_str());                   // Convert JSON to string
-    Serial.println();
-}
+// void to_json(json& j, BME280Data& d) {
+    // j = json {
+        // {"temperature (*C)", d.temperature},
+        // {"pressure (hPa)", d.pressure},
+        // {"altitude (m)", d.altitude},
+        // {"humidity (%)", d.humidity}
+    // };
+// }
 
 
-void to_json(json& j, BME280Data& d) {
-    j = json {
-        {"temperature (*C)", d.temperature},
-        {"pressure (hPa)", d.pressure},
-        {"altitude (m)", d.altitude},
-        {"humidity (%)", d.humidity}
-    };
-}
-
-
-void from_json(json& j, BME280Data& d) {
-    j.at("temperature").get_to(d.temperature);
-    j.at("pressure").get_to(d.pressure);
-    j.at("altitude").get_to(d.altitude);
-    j.at("humidity").get_to(d.humidity);
-}
+// void from_json(json& j, BME280Data& d) {
+    // j.at("temperature").get_to(d.temperature);
+    // j.at("pressure").get_to(d.pressure);
+    // j.at("altitude").get_to(d.altitude);
+    // j.at("humidity").get_to(d.humidity);
+// }

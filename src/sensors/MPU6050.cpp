@@ -82,20 +82,17 @@ void MPU6050::init() {
 }
 
 
-void MPU6050::output_data() {
+MPU6050Data MPU6050::get_data() {
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
-
-    mpu_data.accel_x = a.acceleration.x;
-    mpu_data.accel_y = a.acceleration.y;
-    mpu_data.accel_z = a.acceleration.z;
-    mpu_data.gyro_x = g.gyro.x;
-    mpu_data.gyro_y = g.gyro.y;
-    mpu_data.gyro_z = g.gyro.z;
-    json j = mpu_data;
-    Serial.println(j.dump().c_str());
-    Serial.println();
-    // delay(1000);
+    MPU6050Data d;
+    d.accel_x = a.acceleration.x;
+    d.accel_y = a.acceleration.y;
+    d.accel_z = a.acceleration.z;
+    d.gyro_x = g.gyro.x;
+    d.gyro_y = g.gyro.y;
+    d.gyro_z = g.gyro.z;
+    return d;
 }
 
 
