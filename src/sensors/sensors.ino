@@ -21,5 +21,5 @@ void setup(void) {
 void loop() {
     mpu6050.output_data();
     bme280.loop_output();
-    delay(5000);
+    delay(1000);
 }

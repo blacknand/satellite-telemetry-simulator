@@ -3,6 +3,8 @@
 #include "bme280.h"
 #include "I2C_functions.h"
 
+#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/data_preprocessing/json_conversion.h"
+
 MPU6050Data mpu_data;
 
 void MPU6050::init() {
@@ -90,45 +92,30 @@ void MPU6050::output_data() {
     mpu_data.gyro_x = g.gyro.x;
     mpu_data.gyro_y = g.gyro.y;
     mpu_data.gyro_z = g.gyro.z;
-
-    Serial.print("Acceleration X: ");
-    Serial.print(mpu_data.accel_x);
-    Serial.print(", Y: ");
-    Serial.print(mpu_data.accel_y);
-    Serial.print(", Z: ");
-    Serial.print(mpu_data.accel_z);
-    Serial.println(" m/s^2");
-
-    Serial.print("Rotation X: ");
-    Serial.print(mpu_data.gyro_x);
-    Serial.print(", Y: ");
-    Serial.print(mpu_data.gyro_y);
-    Serial.print(", Z: ");
-    Serial.print(mpu_data.gyro_z);
-    Serial.println(" rad/s");
-
-    Serial.println("");
+    json j = mpu_data;
+    Serial.println(j.dump().c_str());
+    Serial.println();
     // delay(1000);
 }
 
 
-void MPU6050::to_json(json& j, MPU6050Data& d) {
-    j = json {
-        {"accel_x", d.accel_x},
-        {"accel_y", d.accel_y},
-        {"accel_z", d.accel_z},
-        {"gyro_x", d.gyro_x},
-        {"gyro_y", d.gyro_y},
-        {"gyro_z", d.gyro_z}
-    };
-}
+// void to_json(json& j, MPU6050Data& d) {
+//     j = json {
+//         {"accel_x", d.accel_x},
+//         {"accel_y", d.accel_y},
+//         {"accel_z", d.accel_z},
+//         {"gyro_x", d.gyro_x},
+//         {"gyro_y", d.gyro_y},
+//         {"gyro_z", d.gyro_z}
+//     };
+// }
 
 
-void MPU6050::from_json(json& j, MPU6050Data& d) {
-    j.at("accel_x").get_to(d.accel_x);
-    j.at("accel_y").get_to(d.accel_y);
-    j.at("accel_z").get_to(d.accel_z);
-    j.at("gyro_x").get_to(d.gyro_x);
-    j.at("gyro_y").get_to(d.gyro_y);
-    j.at("gyro_z").get_to(d.gyro_z);
-}
+// void from_json(json& j, MPU6050Data& d) {
+//     j.at("accel_x").get_to(d.accel_x);
+//     j.at("accel_y").get_to(d.accel_y);
+//     j.at("accel_z").get_to(d.accel_z);
+//     j.at("gyro_x").get_to(d.gyro_x);
+//     j.at("gyro_y").get_to(d.gyro_y);
+//     j.at("gyro_z").get_to(d.gyro_z);
+// }

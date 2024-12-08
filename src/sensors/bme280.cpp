@@ -1,5 +1,7 @@
 #include "bme280.h"
 
+#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/data_preprocessing/json_conversion.cpp"
+
 BME280Data bme_data;
 
 void BME280::init() {
@@ -25,43 +27,27 @@ void BME280::loop_output() {
 
 
 void BME280::output_data() {
-
     bme_data.temperature = bme.readTemperature();
     bme_data.pressure = bme.readPressure() / 100.0F;
     bme_data.altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
     bme_data.humidity = bme.readHumidity();
-
-    Serial.print("Temperature = ");
-    Serial.print(bme_data.temperature);
-    Serial.println(" *C"); 
-    
-    Serial.print("Pressure = ");
-    Serial.print(bme_data.pressure);
-    Serial.println(" hPa");
-    
-    Serial.print("Approx. Altitude = ");
-    Serial.print(bme_data.altitude);
-    Serial.println(" m");
-    
-    Serial.print("Humidity = ");
-    Serial.print(bme_data.humidity);
-    Serial.println(" %");
-    
+    json j = bme_data;
+    Serial.println(j.dump().c_str());                   // Convert JSON to string
     Serial.println();
 }
 
 
-void BME280::to_json(json& j, BME280Data& d) {
+void to_json(json& j, BME280Data& d) {
     j = json {
-        {"temperature", d.temperature},
-        {"pressure", d.pressure},
-        {"altitude", d.altitude},
-        {"humidity", d.humidity}
+        {"temperature (*C)", d.temperature},
+        {"pressure (hPa)", d.pressure},
+        {"altitude (m)", d.altitude},
+        {"humidity (%)", d.humidity}
     };
 }
 
 
-void BME280::from_json(json& j, BME280Data& d) {
+void from_json(json& j, BME280Data& d) {
     j.at("temperature").get_to(d.temperature);
     j.at("pressure").get_to(d.pressure);
     j.at("altitude").get_to(d.altitude);
