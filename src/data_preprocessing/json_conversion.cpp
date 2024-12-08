@@ -3,11 +3,13 @@
 namespace nlohmann { 
     // Specialization for BME280Data
     void nlohmann::adl_serializer<BME280Data>::to_json(json& j, const BME280Data& d) {
-        j = json {
-            {"temperature (*C)", d.temperature},
-            {"pressure (hPa)", d.pressure},
-            {"altitude (m)", d.altitude},
-            {"humidity (%)", d.humidity}
+        j = json{
+            {"environment", {
+                {"temperature (*C)", d.temperature},
+                {"pressure (hPa)", d.pressure},
+                {"altitude (m)", d.altitude},
+                {"humidity (%)", d.humidity}
+            }}
         };
     }
 
@@ -20,13 +22,17 @@ namespace nlohmann {
 
     // Specialization for MPU6050Data
     void nlohmann::adl_serializer<MPU6050Data>::to_json(json& j, const MPU6050Data& d) {
-        j = json {
-            {"accel_x", d.accel_x},
-            {"accel_y", d.accel_y},
-            {"accel_z", d.accel_z},
-            {"gyro_x", d.gyro_x},
-            {"gyro_y", d.gyro_y},
-            {"gyro_z", d.gyro_z}
+        j = json{
+            {"accelerometer", {
+                {"accel_x", d.accel_x},
+                {"accel_y", d.accel_y},
+                {"accel_z", d.accel_z}
+            }},
+            {"gyroscope", {
+                {"gyro_x", d.gyro_x},
+                {"gyro_y", d.gyro_y},
+                {"gyro_z", d.gyro_z}
+            }}
         };
     }
 
