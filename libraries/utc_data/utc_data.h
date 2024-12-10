@@ -1,4 +1,8 @@
 #include <string>
 #include <chrono>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
 
-std::string update_utc_time();
+std::string get_utc_time();
