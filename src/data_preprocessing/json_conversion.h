@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-struct SensorData {
+struct SatelliteData {
     std::string utc_time;
 
     float temperature;
@@ -28,9 +28,9 @@ struct SensorData {
 
 namespace nlohmann {
     template<>
-    struct adl_serializer<SensorData> {
-        static void to_json(json& j, const SensorData& d);
-        static void from_json(const json& j, SensorData& d);
+    struct adl_serializer<SatelliteData> {
+        static void to_json(json& j, const SatelliteData& d);
+        static void from_json(const json& j, SatelliteData& d);
     };
 }
 

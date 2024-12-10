@@ -1,8 +1,9 @@
 #include "json_conversion.h"
 
 namespace nlohmann { 
-    void nlohmann::adl_serializer<SensorData>::to_json(json& j, const SensorData& d) {
-        j = json{ 
+    void nlohmann::adl_serializer<SatelliteData>::to_json(json& j, const SatelliteData& d) {
+        j = json{
+            {"utc data", d.utc_time}, 
             {"sensors", 
                 {"accelerometer", {
                     {"accel_x", d.accel_x},
@@ -24,7 +25,7 @@ namespace nlohmann {
         };
     }
 
-    void nlohmann::adl_serializer<SensorData>::from_json(const json& j, SensorData& d) {
+    void nlohmann::adl_serializer<SatelliteData>::from_json(const json& j, SatelliteData& d) {
         const auto& sensors = j.at("sensors");
         const auto& env = sensors.at("environment");
         d.temperature = env.at("temperature (*C)").get<float>();
