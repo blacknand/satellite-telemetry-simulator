@@ -1,0 +1,1 @@
+std::string update_utc_time() {}

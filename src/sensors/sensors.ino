@@ -22,8 +22,7 @@ void setup(void) {
 }
 
 void loop() {
-//     mpu6050.output_data();
-    // bme280.loop_output();
+    // TODO: UTC in JSON
     auto bme_data = bme280.get_data();
     auto mpu_data = mpu6050.get_data();
     sensor_data.temperature = bme_data.temperature;

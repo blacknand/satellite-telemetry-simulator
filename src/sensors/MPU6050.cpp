@@ -94,25 +94,3 @@ MPU6050Data MPU6050::get_data() {
     d.gyro_z = g.gyro.z;
     return d;
 }
-
-
-// void to_json(json& j, MPU6050Data& d) {
-//     j = json {
-//         {"accel_x", d.accel_x},
-//         {"accel_y", d.accel_y},
-//         {"accel_z", d.accel_z},
-//         {"gyro_x", d.gyro_x},
-//         {"gyro_y", d.gyro_y},
-//         {"gyro_z", d.gyro_z}
-//     };
-// }
-
-
-// void from_json(json& j, MPU6050Data& d) {
-//     j.at("accel_x").get_to(d.accel_x);
-//     j.at("accel_y").get_to(d.accel_y);
-//     j.at("accel_z").get_to(d.accel_z);
-//     j.at("gyro_x").get_to(d.gyro_x);
-//     j.at("gyro_y").get_to(d.gyro_y);
-//     j.at("gyro_z").get_to(d.gyro_z);
-// }

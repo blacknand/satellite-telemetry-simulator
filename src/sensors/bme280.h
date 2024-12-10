@@ -22,18 +22,12 @@ struct BME280Data {
 
 extern BME280Data bme_data;
 
-// void to_json(json& j, BME280Data& d);
-// void from_json(json& j, BME280Data& d);
-
 class BME280 {
     private:
         Adafruit_BME280 bme;
     public:
         void init();
         BME280Data get_data();
-        // void loop_output();
-        // void to_json(json& j, BME280Data& d);
-        // void from_json(json& j, BME280Data& d);
 };
 
 #endif      // BME_280_SENSOR_H

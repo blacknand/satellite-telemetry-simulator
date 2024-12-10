@@ -24,17 +24,12 @@ struct MPU6050Data {
 
 extern MPU6050Data mpu_data;
 
-// void to_json(json& j, MPU6050Data& d);
-// void from_json(json& j, MPU6050Data& d);
-
 class MPU6050 {
     private:
         Adafruit_MPU6050 mpu;
     public:
         void init();
         MPU6050Data get_data();
-        // void to_json(json& j, MPU6050Data& d);
-        // void from_json(json& j, MPU6050Data& d);
 };
 
 #endif          // MPU6050
