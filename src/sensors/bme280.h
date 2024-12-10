@@ -7,7 +7,7 @@
 #include <Adafruit_BME280.h>
 #include <chrono>
 
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/json.hpp"
+#include "../json.hpp"
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 using json = nlohmann::json;

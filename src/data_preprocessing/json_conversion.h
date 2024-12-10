@@ -3,9 +3,9 @@
 
 #include <chrono>
 
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/json.hpp"
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/sensors/bme280.h"
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/sensors/MPU6050.h"
+#include "../json.hpp"
+#include "../sensors/bme280.h"
+#include "../sensors/MPU6050.h"
 
 using json = nlohmann::json;
 

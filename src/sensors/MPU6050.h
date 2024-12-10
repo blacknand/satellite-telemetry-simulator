@@ -5,7 +5,7 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/json.hpp"
+#include "../json.hpp"
 
 // I2C RP2040 pins
 #define SDA 18

@@ -3,7 +3,7 @@
 #include "bme280.h"
 #include "I2C_functions.h"
 
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/data_preprocessing/json_conversion.h"
+#include "../data_preprocessing/json_conversion.h"
 
 MPU6050Data mpu_data;
 

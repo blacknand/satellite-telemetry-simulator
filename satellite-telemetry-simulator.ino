@@ -1,7 +1,7 @@
-#include "MPU6050.h"
-#include "bme280.h"
+#include "src/sensors/MPU6050.h"
+#include "src/sensors/bme280.h"
 
-#include "/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/data_preprocessing/json_conversion.h"
+#include "src/data_preprocessing/json_conversion.h"
 
 MPU6050 mpu6050;
 BME280 bme280;
