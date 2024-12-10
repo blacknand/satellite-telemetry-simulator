@@ -1,6 +1,5 @@
 #include "utc_data.h"
-int main() { std::cout << get_utc_time() << std::endl;; return 0; }
-// TODO: Update UTC time using sys clock
+
 std::string get_utc_time() {
     const auto now = std::chrono::system_clock::now();
     const std::time_t t_c = std::chrono::system_clock::to_time_t(now);
