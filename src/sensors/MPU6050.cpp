@@ -1,7 +1,7 @@
 #include <fstream>
 #include "MPU6050.h"
 #include "bme280.h"
-#include "I2C_functions.h"
+// #include "I2C_functions.h"
 
 #include "../data_preprocessing/json_conversion.h"
 
