@@ -35,7 +35,9 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(satellite-telemetry-simulator satellite-telemetry-simulator.cpp )
+add_executable(satellite-telemetry-simulator 
+                satellite-telemetry-simulator.cpp
+                sensors/MPU6050.cpp)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")
 pico_set_program_version(satellite-telemetry-simulator "0.1")
@@ -46,11 +48,15 @@ pico_enable_stdio_usb(satellite-telemetry-simulator 1)
 
 # Add the standard library to the build
 target_link_libraries(satellite-telemetry-simulator
-        pico_stdlib)
+        pico_stdlib
+        hardware_i2c)
 
 # Add the standard include files to the build
 target_include_directories(satellite-telemetry-simulator PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/sensors
+  ${CMAKE_CURRENT_LIST_DIR}/data_preprocessing
   ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/..  # For common lwipopts
 )
 
 # Add any user requested libraries
