@@ -37,7 +37,8 @@ pico_sdk_init()
 
 add_executable(satellite-telemetry-simulator 
                 satellite-telemetry-simulator.cpp
-                sensors/MPU6050.cpp)
+                sensors/MPU6050.cpp
+                mpu6050_i2c.c)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")
 pico_set_program_version(satellite-telemetry-simulator "0.1")
@@ -49,7 +50,8 @@ pico_enable_stdio_usb(satellite-telemetry-simulator 1)
 # Add the standard library to the build
 target_link_libraries(satellite-telemetry-simulator
         pico_stdlib
-        hardware_i2c)
+        hardware_i2c
+        mpu6050_i2c)
 
 # Add the standard include files to the build
 target_include_directories(satellite-telemetry-simulator PRIVATE
