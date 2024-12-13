@@ -10,44 +10,7 @@ static int addr = 0x68;
 
 #ifdef i2c_default
 static void mpu6050_reset() {
-    // Two byte reset. First byte register, second byte data
-    // TODO: Accelerometer and gyroscope range config
-    uint8_t buf[2];
-
-    // Self test accelerometer and set range
-    uint8_t accel_config = 0x00;
-    // Set the X, Y and Z accelerometer config registers to perform self test
-    // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
-    // https://www.learn-c.org/en/Bitmasks
-    accel_config |= (1 << 7);       // XA_ST
-    accel_config |= (1 << 6);       // YA_ST
-    accel_config |= (1 << 5);       // ZA_ST
-    accel_config |= (0x00 << 4);    // AFS_SEL
-    accel_config |= (0x00 << 3);    // AFS_SEL
-
-    // Set range
-    // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
-    buf = {0x1C, accel_config}; 
-    i2c_write_blocking(i2c_default, addr, buf, 2, false);   // ± 2g; AFS_SEL register
-    uint8_t accel_test;
-
-    // Self test gyroscope and set range
-    uint8_t gyro_config = 0x00;
-    // Set X, Y and Z gyroscope config registers to perform self test
-    gyro_config |= (1 << 7);         // XG_ST
-    gyro_config |= (1 << 6);         // YG_ST
-    gyro_config |= (1 << 5);         // ZG_ST
-    gyro_config |= (0x00 << 4);     // FS_SEL
-    gyro_config |= (0x00 << 3);     // FS_SEL
-
-    // Set range
-    // ±250dp
-    buf = {0x1B, gyro_config};
-    i2c_write_blocking(i2c_default, addr, buf, 2, false);
-    uint8_t gyro_test;
-
-    memset(buf, 0, sizeof buf);     // Clear buffer
-    buf = {0x6B, 0x80};
+    uint8_t buf[] = {0x6B, 0x80};
     i2c_write_blocking(i2c_default, addr, buf, 2, false);
     sleep_ms(100); // Allow device to reset and stabilize
 
@@ -101,7 +64,41 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 }
 
 static void config_mpu6050() {
-    
+    uint8_t buf[2];
+
+    // Self test accelerometer and set range
+    uint8_t accel_config = 0x00;
+    // Set the X, Y and Z accelerometer config registers to perform self test
+    // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
+    // https://www.learn-c.org/en/Bitmasks
+    accel_config |= (1 << 7);       // XA_ST
+    accel_config |= (1 << 6);       // YA_ST
+    accel_config |= (1 << 5);       // ZA_ST
+    accel_config |= (0x00 << 4);    // AFS_SEL
+    accel_config |= (0x00 << 3);    // AFS_SEL
+
+    // Set range
+    // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
+    buf = {0x1C, accel_config}; 
+    i2c_write_blocking(i2c_default, addr, buf, 2, false);   // ± 2g; AFS_SEL register
+    uint8_t accel_test;
+
+    // Self test gyroscope and set range
+    uint8_t gyro_config = 0x00;
+    // Set X, Y and Z gyroscope config registers to perform self test
+    gyro_config |= (1 << 7);         // XG_ST
+    gyro_config |= (1 << 6);         // YG_ST
+    gyro_config |= (1 << 5);         // ZG_ST
+    gyro_config |= (0x00 << 4);     // FS_SEL
+    gyro_config |= (0x00 << 3);     // FS_SEL
+
+    // Set range
+    // ±250dp
+    buf = {0x1B, gyro_config};
+    i2c_write_blocking(i2c_default, addr, buf, 2, false);
+    uint8_t gyro_test;
+
+
 }
 
 static void calibrate_mpu6050() {
