@@ -74,14 +74,14 @@ static void config_mpu6050() {
     accel_config |= (1 << 7);       // XA_ST
     accel_config |= (1 << 6);       // YA_ST
     accel_config |= (1 << 5);       // ZA_ST
-    accel_config |= (0x00 << 4);    // AFS_SEL
-    accel_config |= (0x00 << 3);    // AFS_SEL
+    // AF_SEL bits already at 0
+    buf[0] = 0x1C;
+    buf[1] = accel_config;
 
     // Set range
     // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
-    buf = {0x1C, accel_config}; 
     i2c_write_blocking(i2c_default, addr, buf, 2, false);   // ± 2g; AFS_SEL register
-    uint8_t accel_test;
+    memset(buf, 0, sizeof buf);
 
     // Self test gyroscope and set range
     uint8_t gyro_config = 0x00;
@@ -89,16 +89,13 @@ static void config_mpu6050() {
     gyro_config |= (1 << 7);         // XG_ST
     gyro_config |= (1 << 6);         // YG_ST
     gyro_config |= (1 << 5);         // ZG_ST
-    gyro_config |= (0x00 << 4);     // FS_SEL
-    gyro_config |= (0x00 << 3);     // FS_SEL
+    // FS_SEL already at 0
+    buf[0] = 0x1B;
+    buf[1] = gyro_config;
 
     // Set range
     // ±250dp
-    buf = {0x1B, gyro_config};
     i2c_write_blocking(i2c_default, addr, buf, 2, false);
-    uint8_t gyro_test;
-
-
 }
 
 static void calibrate_mpu6050() {
