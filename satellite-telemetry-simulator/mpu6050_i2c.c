@@ -156,8 +156,28 @@ static void calibrate_mpu6050() {
         buffer[1] = accel_offsets[i] & 0xFF;
     }
 
-    i2c_write_blocking(i2c_default, addr, 0x3B, );
+    i2c_write_blocking(i2c_default, addr, 0x3B, false);
     
+}
+
+static bool test_mpu6050() {
+    // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
+    // Self test response minimum and maximum accepted values are -14 and +14
+    int16_t self_test_accel[3], self_test_gyro[3], temp;
+    mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
+    mpu6050_reset();    // Reset to get raw values without performing self test
+    int16_t accel[3], gyro[3];
+    mpu6050_read_raw(accel, gyro, &temp;)   // Do not need to create new temp since it is not tested
+
+    int16_t accel_test_result[3], gyro_test_result[3];
+    for (int i = 0; i < 3; i++) {
+        accel_test_result[i] = self_accel_test[i] - accel[i];
+        gyro_test_result[i] = self_test_gyro[i] - gyro[i];
+        if (accel_test_result[i] < -14 || accel_test_result[i] > 14 ||
+            gyro_test_result[i] < -14 || gyro_test_result[i] > 14)
+            return false;
+    }
+    return true;
 }
 #endif
 
@@ -180,6 +200,10 @@ int main() {
     bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
     mpu6050_reset();
+    calibrate_mpu6050();
+    mpu6050_config();
+    test_mpu6050();
+    mpu6050_config();
 
     int16_t acceleration[3], gyro[3], temp;
 
