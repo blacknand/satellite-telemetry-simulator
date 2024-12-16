@@ -142,11 +142,13 @@ static void calibrate_mpu6050() {
     free(total_temp);
 
     // Calculate offset values
-    int16_t accel_offset[3], gyro_offset[3];
+    int16_t accel_offsets[3], gyro_offset[3];
     for (int i = 0; i < 3; i++) {
         accel_offsets[i] = -avg_acceleration[i];
         gyro_offset[i] = -avg_gyro[i];
-    } 
+    }
+
+    // TODO: Write to correct offset registers 
 
     accel_offset[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
     uint8_t buffer[2];
@@ -154,10 +156,14 @@ static void calibrate_mpu6050() {
         // Shift the high byte to low byte position and combine with 0xFF to get the high byte
         buffer[0] = (accel_offsets[i] >> 8) &  0xFF;
         buffer[1] = accel_offsets[i] & 0xFF;
+        i2c_write_blocking(i2c_default, addr, buffer, 0x3B, false);
     }
 
-    i2c_write_blocking(i2c_default, addr, 0x3B, false);
-    
+    for (int i = 0; i < 3; i++) {
+        buffer[0] = (gyro_offsets[i] >> 8) & 0xFF;
+        buffer[1] = gyro_offsets[i] & 0xFF;
+        i2c_write_blocking(i2c_default, addr, buffer, 0x3B, false);
+    } 
 }
 
 static bool test_mpu6050() {
