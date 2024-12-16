@@ -1,31 +1,24 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
-#include "hardware/i2c.h"
+#include "mpu6050_i2c.h"
 
 
-static int addr = 0x68;
-
-#ifdef i2c_default
 static void mpu6050_reset() {
     uint8_t buf[] = {0x6B, 0x80};
-    i2c_write_blocking(i2c_default, addr, buf, 2, false);
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
     sleep_ms(100); // Allow device to reset and stabilize
 
     // Clear sleep mode (0x6B register, 0x00 value)
     buf[1] = 0x00;  // Clear sleep mode by writing 0x00 to the 0x6B register; PWR_MGMT_1
-    i2c_write_blocking(i2c_default, addr, buf, 2, false); 
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false); 
     sleep_ms(10);   // Allow stabilization after waking up
 }
+
 
 static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
     /* For this particular device, we send the device the register we want to read
      * first, then subsequently read from the device. The register is auto incrementing
      * so we don't need to keep sending the register we want, just the first.
      * 
-     * Because we are using I2C, we write the register address we want to read from
+     * Because we are using I2C, we write the register ADDRess we want to read from
      * to the MPU6050 first and then after this write reading starts from the specified
      * register.
      */
@@ -34,8 +27,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 
     // Start reading acceleration registers from register 0x3B for 6 bytes
     uint8_t val = 0x3B;
-    i2c_write_blocking(i2c_default, addr, &val, 1, true);       // Keep master control of bus
-    i2c_read_blocking(i2c_default, addr, buffer, 6, false);     // False, finished with bus
+    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);       // Keep master control of bus
+    i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);     // False, finished with bus
 
     /**
      * Bit shift each axis data by 8 bits left to read from the 
@@ -48,8 +41,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 
     // Now gyro data from reg 0x43 for 6 bytes
     val = 0x43;
-    i2c_write_blocking(i2c_default, addr, &val, 1, true);
-    i2c_read_blocking(i2c_default, addr, buffer, 6, false);
+    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);
+    i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);
 
     for (int i = 0; i < 3; i++) {
         gyro[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]);;
@@ -57,13 +50,14 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 
     // Now temperature from reg 0x41 for 2 bytes
     val = 0x41;
-    i2c_write_blocking(i2c_default, addr, &val, 1, true);
-    i2c_read_blocking(i2c_default, addr, buffer, 2, false); 
+    i2c_write_blocking(i2c_default, ADDR, &val, 1, true);
+    i2c_read_blocking(i2c_default, ADDR, buffer, 2, false); 
 
     *temp = buffer[0] << 8 | buffer[1];
 }
 
-static void config_mpu6050() {
+
+static void mpu6050_config() {
     uint8_t buf[2];
 
     // Self test accelerometer and set range
@@ -80,7 +74,7 @@ static void config_mpu6050() {
 
     // Set range
     // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
-    i2c_write_blocking(i2c_default, addr, buf, 2, false);   // ± 2g; AFS_SEL register
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);   // ± 2g; AFS_SEL register
     memset(buf, 0, sizeof buf);
 
     // Self test gyroscope and set range
@@ -95,10 +89,11 @@ static void config_mpu6050() {
 
     // Set range
     // ±250dp
-    i2c_write_blocking(i2c_default, addr, buf, 2, false);
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
 }
 
-static void calibrate_mpu6050() {
+
+static void mpu6050_calibrate() {
     /**
      * Calibrate the accelerometer and gyroscope.
      * This works by calculating the average values on all three axis
@@ -142,42 +137,43 @@ static void calibrate_mpu6050() {
     free(total_temp);
 
     // Calculate offset values
-    int16_t accel_offsets[3], gyro_offset[3];
+    int16_t accel_offsets[3], gyro_offsets[3];
     for (int i = 0; i < 3; i++) {
         accel_offsets[i] = -avg_acceleration[i];
-        gyro_offset[i] = -avg_gyro[i];
+        gyro_offsets[i] = -avg_gyro[i];
     }
 
     // TODO: Write to correct offset registers 
 
-    accel_offset[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
+    accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
     uint8_t buffer[2];
     for (int i = 0; i < 3; i++) {
         // Shift the high byte to low byte position and combine with 0xFF to get the high byte
         buffer[0] = (accel_offsets[i] >> 8) &  0xFF;
         buffer[1] = accel_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, addr, buffer, 0x3B, false);
+        i2c_write_blocking(i2c_default, ADDR, buffer, 0x3B, false);
     }
 
     for (int i = 0; i < 3; i++) {
         buffer[0] = (gyro_offsets[i] >> 8) & 0xFF;
         buffer[1] = gyro_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, addr, buffer, 0x3B, false);
+        i2c_write_blocking(i2c_default, ADDR, buffer, 0x3B, false);
     } 
 }
 
-static bool test_mpu6050() {
+
+static bool mpu6050_test() {
     // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
     // Self test response minimum and maximum accepted values are -14 and +14
     int16_t self_test_accel[3], self_test_gyro[3], temp;
     mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
     mpu6050_reset();    // Reset to get raw values without performing self test
     int16_t accel[3], gyro[3];
-    mpu6050_read_raw(accel, gyro, &temp;)   // Do not need to create new temp since it is not tested
+    mpu6050_read_raw(accel, gyro, &temp);   // Do not need to create new temp since it is not tested
 
     int16_t accel_test_result[3], gyro_test_result[3];
     for (int i = 0; i < 3; i++) {
-        accel_test_result[i] = self_accel_test[i] - accel[i];
+        accel_test_result[i] = self_test_accel[i] - accel[i];
         gyro_test_result[i] = self_test_gyro[i] - gyro[i];
         if (accel_test_result[i] < -14 || accel_test_result[i] > 14 ||
             gyro_test_result[i] < -14 || gyro_test_result[i] > 14)
@@ -185,10 +181,9 @@ static bool test_mpu6050() {
     }
     return true;
 }
-#endif
 
-int main() {
-    stdio_init_all();
+
+void mpu6050_readings(){
 #if !defined(i2c_default) || !defined(PICO_DEFAULT_I2C_SDA_PIN) || !defined(PICO_DEFAULT_I2C_SCL_PIN)
     #warning mpu6050_i2c.c requires a board with I2C pins
     puts("Default I2C pins were not defined");
@@ -205,13 +200,23 @@ int main() {
     // Make the I2C pins available to picotool
     bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
-    mpu6050_reset();
-    calibrate_mpu6050();
-    mpu6050_config();
-    test_mpu6050();
-    mpu6050_config();
-
     int16_t acceleration[3], gyro[3], temp;
+
+    /**
+     * Order of functions:
+     * 1. Call config first to configure sensor
+     * 2. Calibrate sensor for accurate readings
+     * 3. Test sensor which requires reseting sensor for raw readings
+     * 4. If test passed then call config and calibrate again
+     */
+    mpu6050_reset();
+    mpu6050_config();
+    mpu6050_calibrate();
+    bool test = mpu6050_test();
+    if (!test)
+        return;
+    mpu6050_config();
+    mpu6050_calibrate();
 
     while (1) {
         mpu6050_read_raw(acceleration, gyro, &temp);
