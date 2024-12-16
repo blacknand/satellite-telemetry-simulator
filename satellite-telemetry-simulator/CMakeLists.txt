@@ -36,7 +36,7 @@ pico_sdk_init()
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(satellite-telemetry-simulator 
-                satellite-telemetry-simulator.cpp
+                satellite_telemetry_simulator.cpp
                 mpu6050_i2c.c)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")

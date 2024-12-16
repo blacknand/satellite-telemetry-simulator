@@ -172,9 +172,16 @@ static bool mpu6050_test() {
     mpu6050_read_raw(accel, gyro, &temp);   // Do not need to create new temp since it is not tested
 
     int16_t accel_test_result[3], gyro_test_result[3];
+    int counter = 0;
     for (int i = 0; i < 3; i++) {
+        printf("self_test_accel[%i] = %i, self_test_gyro[%i] = %i\n", counter, self_test_accel[i], counter, self_test_gyro[i]);
+        printf("accel[%i] = %i, gyro[%i] = %i\n", counter, accel[i], counter, gyro[i]);
+
         accel_test_result[i] = self_test_accel[i] - accel[i];
         gyro_test_result[i] = self_test_gyro[i] - gyro[i];
+        counter++;
+        printf("Accel test %i result: %i\n", counter, accel_test_result[i]);
+        printf("Gyro test %i result: %i\n", counter, accel_test_result[i]);
         if (accel_test_result[i] < -14 || accel_test_result[i] > 14 ||
             gyro_test_result[i] < -14 || gyro_test_result[i] > 14)
             return false;
@@ -189,7 +196,7 @@ void mpu6050_readings(){
     puts("Default I2C pins were not defined");
     return 0;
 #else
-    printf("MPU6050 reading raw data from registers...\n");
+    printf("MPU6050 reading data from registers...\n");
 
     // I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
     i2c_init(i2c_default, 400 * 1000);
@@ -213,8 +220,10 @@ void mpu6050_readings(){
     mpu6050_config();
     mpu6050_calibrate();
     bool test = mpu6050_test();
-    if (!test)
+    if (!test) {
+        printf("MPU6050 test failed");
         return;
+    }
     mpu6050_config();
     mpu6050_calibrate();
 
