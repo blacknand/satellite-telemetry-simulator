@@ -103,6 +103,21 @@ static void mpu6050_calibrate() {
      * 
      * The temperature can affec the readings
      * so periodic recalibration is recommended
+     * 
+    Accelerometer Offsets:
+        0x06: XA_OFFS_H (High Byte of X-axis Accelerometer Offset)
+        0x07: XA_OFFS_L (Low Byte of X-axis Accelerometer Offset)
+        0x08: YA_OFFS_H (High Byte of Y-axis Accelerometer Offset)
+        0x09: YA_OFFS_L (Low Byte of Y-axis Accelerometer Offset)
+        0x0A: ZA_OFFS_H (High Byte of Z-axis Accelerometer Offset)
+        0x0B: ZA_OFFS_L (Low Byte of Z-axis Accelerometer Offset)
+    Gyroscope Offsets:
+        0x13: XG_OFFS_USRH (High Byte of X-axis Gyroscope Offset)
+        0x14: XG_OFFS_USRL (Low Byte of X-axis Gyroscope Offset)
+        0x15: YG_OFFS_USRH (High Byte of Y-axis Gyroscope Offset)
+        0x16: YG_OFFS_USRL (Low Byte of Y-axis Gyroscope Offset)
+        0x17: ZG_OFFS_USRH (High Byte of Z-axis Gyroscope Offset)
+        0x18: ZG_OFFS_USRL (Low Byte of Z-axis Gyroscope Offset)
      */
     // [0] - X-Axis
     // [1] - Y-Axis
@@ -147,17 +162,29 @@ static void mpu6050_calibrate() {
 
     accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
     uint8_t buffer[2];
+    uint8_t accel_offset_regs[3] = {0x06, 0x08, 0x0A};  // XA, YA, ZA
+    uint8_t gyro_offset_regs[3] = {0x13, 0x15, 0x17};  // XG, YG, ZG
+
+    // Write the high byte and low byte to the accelerometer offset registers
     for (int i = 0; i < 3; i++) {
-        // Shift the high byte to low byte position and combine with 0xFF to get the high byte
-        buffer[0] = (accel_offsets[i] >> 8) &  0xFF;
+        buffer[0] = accel_offset_regs[i];
+        buffer[1] = (accel_offsets[i] >> 8) & 0xFF;
+        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
+
+        buffer[0] = accel_offset_regs[i] + 1;
         buffer[1] = accel_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 0x3B, false);
+        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
     }
 
+    // Write the high byte and low byte to the gyroscope offset registers
     for (int i = 0; i < 3; i++) {
-        buffer[0] = (gyro_offsets[i] >> 8) & 0xFF;
-        buffer[1] = gyro_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 0x3B, false);
+        buffer[0] = gyro_offset_regs[i];
+        buffer[1] = (gyro_offset_regs[i] >> 8) & 0xFF;
+        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
+        
+        buffer[0] = gyro_offset_regs[i];
+        buffer[1] = (gyro_offset_regs[i] >> 8) & 0xFF;
+        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
     } 
 }
 
@@ -170,6 +197,8 @@ static bool mpu6050_test() {
     mpu6050_reset();    // Reset to get raw values without performing self test
     int16_t accel[3], gyro[3];
     mpu6050_read_raw(accel, gyro, &temp);   // Do not need to create new temp since it is not tested
+
+    // TODO: verify if the sensor test response with self-test enabled means with offset values + config or just raw output with self test enabled
 
     int16_t accel_test_result[3], gyro_test_result[3];
     int counter = 0;
