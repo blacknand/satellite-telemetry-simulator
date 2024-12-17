@@ -180,11 +180,11 @@ static void mpu6050_calibrate() {
     // Write the high byte and low byte to the gyroscope offset registers
     for (int i = 0; i < 3; i++) {
         buffer[0] = gyro_offset_regs[i];
-        buffer[1] = (gyro_offset_regs[i] >> 8) & 0xFF;
+        buffer[1] = (gyro_offsets[i] >> 8) & 0xFF;
         i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
         
-        buffer[0] = gyro_offset_regs[i];
-        buffer[1] = (gyro_offset_regs[i] >> 8) & 0xFF;
+        buffer[0] = gyro_offset_regs[i] + 1;
+        buffer[1] = gyro_offsets[i] & 0xFF;
         i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
     } 
 }
@@ -214,8 +214,8 @@ static bool mpu6050_test() {
         i2c_write_blocking(i2c_default, ADDR, &self_test_reg[i], 1, true);
         i2c_read_blocking(i2c_default, ADDR, &g_test_vars[i], 1, true);
         i2c_read_blocking(i2c_default, ADDR, &a_test_vars[i], 1, false);
-        g_test_vars[i] = self_test_reg[i] & 0x1F; 
-        a_test_vars[i] = (self_test_reg[i] & 0xE0) >> 5;
+        g_test_vars[i] = g_test_vars[i] & 0x1F; 
+        a_test_vars[i] = (a_test_vars[i] & 0xE0) >> 5;
     }
 
     // Calculate factory trim values, full scale range should be set to +250dps (already done by default)
