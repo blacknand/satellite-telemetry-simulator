@@ -59,34 +59,23 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 
 static void mpu6050_config() {
     uint8_t buf[2];
-
     // Self test accelerometer and set range
     uint8_t accel_config = 0x00;
-    // Set the X, Y and Z accelerometer config registers to perform self test
-    // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
-    // accel_config |= (1 << 7);       // XA_ST
-    // accel_config |= (1 << 6);       // YA_ST
-    // accel_config |= (1 << 5);       // ZA_ST
     // AF_SEL bits already at 0
     buf[0] = 0x1C;
 //     buf[1] = accel_config;
-    buf[1] = 0xE0;
+    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XA_ST, YA_ST, ZA_ST
 
     // Set range
     // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
     i2c_write_blocking(i2c_default, ADDR, buf, 2, false);   // ± 2g; AFS_SEL register
-    memset(buf, 0, sizeof buf);
 
     // Self test gyroscope and set range
     uint8_t gyro_config = 0x00;
     // Set X, Y and Z gyroscope config registers to perform self test
-    // gyro_config |= (1 << 7);         // XG_ST
-    // gyro_config |= (1 << 6);         // YG_ST
-    // gyro_config |= (1 << 5);         // ZG_ST
     // FS_SEL already at 0
     buf[0] = 0x1B;
-    // buf[1] = gyro_config;
-    buf[1] = 0xE0;
+    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XG_ST, YG_ST, ZG_ST
 
     // Set range
     // ±250dp
@@ -210,12 +199,16 @@ static bool mpu6050_test() {
     uint8_t self_test_reg[3] = {0x0D, 0x0E, 0x0F};  
     uint8_t g_test_vars[3] = {0, 0, 0};
     uint8_t a_test_vars[3] = {0, 0, 0};
+    reg_val = 0;
     for (int i = 0; i < 3; i++) {
         i2c_write_blocking(i2c_default, ADDR, &self_test_reg[i], 1, true);
-        i2c_read_blocking(i2c_default, ADDR, &g_test_vars[i], 1, true);
-        i2c_read_blocking(i2c_default, ADDR, &a_test_vars[i], 1, false);
-        g_test_vars[i] = g_test_vars[i] & 0x1F; 
-        a_test_vars[i] = (a_test_vars[i] & 0xE0) >> 5;
+        // i2c_read_blocking(i2c_default, ADDR, &g_test_vars[i], 1, true);
+        // i2c_read_blocking(i2c_default, ADDR, &a_test_vars[i], 1, false);
+        i2c_read_blocking(i2c_default, ADDR, &reg_val, 1, false);
+//         g_test_vars[i] = g_test_vars[i] & 0x1F; 
+        // a_test_vars[i] = (a_test_vars[i] & 0xE0) >> 5;
+        g_test_vars[i] = reg_val & 0x1F;
+        a_test_vars[i] = (reg_val & 0xE0) >> 5;
     }
 
     // Calculate factory trim values, full scale range should be set to +250dps (already done by default)
@@ -255,7 +248,8 @@ static bool mpu6050_test() {
     mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
 
     // Disable self-test
-    mpu6050_reset();    
+    mpu6050_reset();   
+    mpu6050_calibrate(); 
     sleep_ms(100);
     mpu6050_read_raw(accel, gyro, &temp);
 
@@ -267,8 +261,15 @@ static bool mpu6050_test() {
             return false;
         }
 
-        float accel_deviation = ((float)(self_test_accel[i] - accel[i])) / ft_accel[i];
-        float gyro_deviation = ((float)(self_test_gyro[i] - gyro[i])) / ft_gyro[i];
+        // Scale raw values for deviation calculation
+        float scaled_self_test_accel = self_test_accel[i] / 16384.0;  // Convert to g
+        float scaled_accel = accel[i] / 16384.0;                      // Convert to g
+        float scaled_self_test_gyro = self_test_gyro[i] / 131.0;      // Convert to °/s
+        float scaled_gyro = gyro[i] / 131.0;                          // Convert to °/s
+
+        float accel_deviation = (scaled_self_test_accel - scaled_accel) / ft_accel[i];
+        float gyro_deviation = (scaled_self_test_gyro - scaled_gyro) / ft_gyro[i];
+
 
         printf("Accel Deviation Axis %d: %.2f%%\n", i, accel_deviation * 100);
         printf("Gyro Deviation Axis %d: %.2f%%\n", i, gyro_deviation * 100);
