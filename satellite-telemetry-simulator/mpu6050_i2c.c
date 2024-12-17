@@ -205,7 +205,47 @@ static bool mpu6050_test() {
     // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
     // Deviation = (Measured Output with Self-Test Enabled−Normal Output) / Factory Trim
     // Deviation response minimum and maximum accepted values are -14 and +14
-    int8_t buf[2];
+
+    // Get factory trim values for gyroscope
+    uint8_t self_test_reg[3] = {0x0D, 0x0E, 0x0F};  
+    uint8_t g_test_vars[3] = {0, 0, 0};
+    uint8_t a_test_vars[3] = {0, 0, 0};
+    for (int i = 0; i < 3; i++) {
+        i2c_write_blocking(i2c_default, ADDR, &self_test_reg[i], 1, true);
+        i2c_read_blocking(i2c_default, ADDR, &g_test_vars[i], 1, true);
+        i2c_read_blocking(i2c_default, ADDR, &a_test_vars[i], 1, false);
+        g_test_vars[i] = self_test_reg[i] & 0x1F; 
+        a_test_vars[i] = (self_test_reg[i] & 0xE0) >> 5;
+    }
+
+    // Calculate factory trim values, full scale range should be set to +250dps (already done by default)
+    // Equations on page 10: https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
+    float ft_accel[3] = {0, 0, 0};
+    float ft_gyro[3] = {0, 0, 0};
+    for (int i = 0; i < 3; i++) {
+        if (g_test_vars[i] != 0) {
+            if (i == 0) {  // X-axis (FT[Xg])
+                ft_gyro[i] = 25.0 * 131.0 * pow(1.046, g_test_vars[i] - 1.0);
+            } else if (i == 1) {  // Y-axis (FT[Yg])
+                ft_gyro[i] = -25.0 * 131.0 * pow(1.046, g_test_vars[i] - 1.0);
+            } else if (i == 2) {  // Z-axis (FT[Zg])
+                ft_gyro[i] = 25.0 * 131.0 * pow(1.046, g_test_vars[i] - 1.0);
+            }
+        } else 
+            ft_gyro[i] = 0.0;
+    }
+
+    // Full-scale range should be set to +8g (already done by default)
+    for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
+            if (a_test_vars[i] != 0) {
+                ft_accel[i] = 4096.0 * 0.34 * (pow(0.92, ((a_test_vars[i] - 1.0) / pow(2, 3))) / 0.34);
+            } else {
+                ft_accel[i] = 0.0;  // If TEST = 0, FT = 0
+            }
+        }
+    }
+
     int16_t self_test_accel[3], self_test_gyro[3], temp;
     int16_t accel[3], gyro[3];
 
@@ -221,16 +261,21 @@ static bool mpu6050_test() {
 
     // TODO: verify if the sensor test response with self-test enabled means with offset values + config or just raw output with self test enabled
 
-    int16_t accel_test_result[3], gyro_test_result[3];
     for (int i = 0; i < 3; i++) {
-        accel_test_result[i] = self_test_accel[i] - accel[i];
-        gyro_test_result[i] = self_test_gyro[i] - gyro[i];
+        if (ft_accel[i] == 0.0 || ft_gyro[i] == 0.0) {
+            printf("Factory Trim Value is zero for Axis %d. Cannot calculate deviation.\n", i);
+            return false;
+        }
 
-        printf("Accel Test Axis %d: %d\n", i, accel_test_result[i]);
-        printf("Gyro Test Axis %d: %d\n", i, gyro_test_result[i]);
+        float accel_deviation = ((float)(self_test_accel[i] - accel[i])) / ft_accel[i];
+        float gyro_deviation = ((float)(self_test_gyro[i] - gyro[i])) / ft_gyro[i];
 
-        if (accel_test_result[i] < -14 || accel_test_result[i] > 14 ||
-            gyro_test_result[i] < -14 || gyro_test_result[i] > 14) {
+        printf("Accel Deviation Axis %d: %.2f%%\n", i, accel_deviation * 100);
+        printf("Gyro Deviation Axis %d: %.2f%%\n", i, gyro_deviation * 100);
+
+        // Check if deviation is within -14% to +14%
+        if (accel_deviation < -0.14 || accel_deviation > 0.14 ||
+            gyro_deviation < -0.14 || gyro_deviation > 0.14) {
             printf("Self-Test Failed on Axis %d\n", i);
             return false;
         }
