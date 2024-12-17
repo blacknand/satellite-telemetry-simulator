@@ -64,13 +64,13 @@ static void mpu6050_config() {
     uint8_t accel_config = 0x00;
     // Set the X, Y and Z accelerometer config registers to perform self test
     // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
-    // https://www.learn-c.org/en/Bitmasks
-    accel_config |= (1 << 7);       // XA_ST
-    accel_config |= (1 << 6);       // YA_ST
-    accel_config |= (1 << 5);       // ZA_ST
+    // accel_config |= (1 << 7);       // XA_ST
+    // accel_config |= (1 << 6);       // YA_ST
+    // accel_config |= (1 << 5);       // ZA_ST
     // AF_SEL bits already at 0
     buf[0] = 0x1C;
-    buf[1] = accel_config;
+//     buf[1] = accel_config;
+    buf[1] = 0xE0;
 
     // Set range
     // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
@@ -80,12 +80,13 @@ static void mpu6050_config() {
     // Self test gyroscope and set range
     uint8_t gyro_config = 0x00;
     // Set X, Y and Z gyroscope config registers to perform self test
-    gyro_config |= (1 << 7);         // XG_ST
-    gyro_config |= (1 << 6);         // YG_ST
-    gyro_config |= (1 << 5);         // ZG_ST
+    // gyro_config |= (1 << 7);         // XG_ST
+    // gyro_config |= (1 << 6);         // YG_ST
+    // gyro_config |= (1 << 5);         // ZG_ST
     // FS_SEL already at 0
     buf[0] = 0x1B;
-    buf[1] = gyro_config;
+    // buf[1] = gyro_config;
+    buf[1] = 0xE0;
 
     // Set range
     // ±250dp
@@ -190,32 +191,50 @@ static void mpu6050_calibrate() {
 
 
 static bool mpu6050_test() {
+    // Check sensor is not in sleep mode
+    uint8_t reg_addr = 0x6B;
+    uint8_t reg_val = 0;
+    i2c_write_blocking(i2c_default, ADDR, &reg_addr, 1, true);
+    i2c_read_blocking(i2c_default, ADDR, &reg_val, 1, false);
+    bool is_asleep = (reg_val & (1 << 6)) != 0;
+    if (is_asleep) {
+        printf("MPU6050 sensor is alseep\n");
+        return false;
+    }
+
     // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
-    // Self test response minimum and maximum accepted values are -14 and +14
+    // Deviation = (Measured Output with Self-Test Enabled−Normal Output) / Factory Trim
+    // Deviation response minimum and maximum accepted values are -14 and +14
+    int8_t buf[2];
     int16_t self_test_accel[3], self_test_gyro[3], temp;
-    mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
-    mpu6050_reset();    // Reset to get raw values without performing self test
     int16_t accel[3], gyro[3];
-    mpu6050_read_raw(accel, gyro, &temp);   // Do not need to create new temp since it is not tested
+
+    // Enable self-test
+    mpu6050_config();
+    sleep_ms(100);
+    mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
+
+    // Disable self-test
+    mpu6050_reset();    
+    sleep_ms(100);
+    mpu6050_read_raw(accel, gyro, &temp);
 
     // TODO: verify if the sensor test response with self-test enabled means with offset values + config or just raw output with self test enabled
 
     int16_t accel_test_result[3], gyro_test_result[3];
-    int counter = 0;
     for (int i = 0; i < 3; i++) {
-        printf("self_test_accel[%i] = %i, self_test_gyro[%i] = %i\n", counter, self_test_accel[i], counter, self_test_gyro[i]);
-        printf("accel[%i] = %i, gyro[%i] = %i\n", counter, accel[i], counter, gyro[i]);
-
         accel_test_result[i] = self_test_accel[i] - accel[i];
         gyro_test_result[i] = self_test_gyro[i] - gyro[i];
-        counter++;
-        printf("Accel test %i result: %i\n", counter, accel_test_result[i]);
-        printf("Gyro test %i result: %i\n", counter, accel_test_result[i]);
+
+        printf("Accel Test Axis %d: %d\n", i, accel_test_result[i]);
+        printf("Gyro Test Axis %d: %d\n", i, gyro_test_result[i]);
+
         if (accel_test_result[i] < -14 || accel_test_result[i] > 14 ||
-            gyro_test_result[i] < -14 || gyro_test_result[i] > 14)
+            gyro_test_result[i] < -14 || gyro_test_result[i] > 14) {
+            printf("Self-Test Failed on Axis %d\n", i);
             return false;
+        }
     }
-    return true;
 }
 
 
@@ -247,7 +266,7 @@ void mpu6050_readings(){
      */
     mpu6050_reset();
     mpu6050_config();
-    mpu6050_calibrate();
+    // mpu6050_calibrate();
     bool test = mpu6050_test();
     if (!test) {
         printf("MPU6050 test failed");
