@@ -57,32 +57,6 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 }
 
 
-static void mpu6050_config() {
-    uint8_t buf[2];
-    // Self test accelerometer and set range
-    uint8_t accel_config = 0x00;
-    // AF_SEL bits already at 0
-    buf[0] = 0x1C;
-//     buf[1] = accel_config;
-    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XA_ST, YA_ST, ZA_ST
-
-    // Set range
-    // ± 2g is the most suitable range for this as it is to simulate a satellite in orbit, so it will not experience large accelerations
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);   // ± 2g; AFS_SEL register
-
-    // Self test gyroscope and set range
-    uint8_t gyro_config = 0x00;
-    // Set X, Y and Z gyroscope config registers to perform self test
-    // FS_SEL already at 0
-    buf[0] = 0x1B;
-    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XG_ST, YG_ST, ZG_ST
-
-    // Set range
-    // ±250dp
-    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
-}
-
-
 static void mpu6050_calibrate() {
     /**
      * Calibrate the accelerometer and gyroscope.
@@ -146,9 +120,9 @@ static void mpu6050_calibrate() {
     for (int i = 0; i < 3; i++) {
         accel_offsets[i] = -avg_acceleration[i];
         gyro_offsets[i] = -avg_gyro[i];
+        // printf("accel_offsets[%i]: %i", i, accel_offsets[i]);
+        // printf("gyro_offsets[%i]: %i", i, gyro_offsets[i]);
     }
-
-    // TODO: Write to correct offset registers 
 
     accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
     uint8_t buffer[2];
@@ -191,9 +165,17 @@ static bool mpu6050_test() {
         return false;
     }
 
-    // Self-test response = Sensor output with self-test enabled – Sensor output without self-test enabled
-    // Deviation = (Measured Output with Self-Test Enabled−Normal Output) / Factory Trim
-    // Deviation response minimum and maximum accepted values are -14 and +14
+    // Configure accelerometer and gyroscope range
+    uint8_t buf[2];
+    buf[0] = 0x1C;
+    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XA_ST, YA_ST, ZA_ST
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+
+    buf[0] = 0x1B;
+    buf[1] = (1 << 7) | (1 << 6) | (1 << 5);  // XG_ST, YG_ST, ZG_ST
+    i2c_write_blocking(i2c_default, ADDR, buf, 2, false);
+
+    sleep_ms(100);
 
     // Get factory trim values for gyroscope
     uint8_t self_test_reg[3] = {0x0D, 0x0E, 0x0F};  
@@ -202,11 +184,7 @@ static bool mpu6050_test() {
     reg_val = 0;
     for (int i = 0; i < 3; i++) {
         i2c_write_blocking(i2c_default, ADDR, &self_test_reg[i], 1, true);
-        // i2c_read_blocking(i2c_default, ADDR, &g_test_vars[i], 1, true);
-        // i2c_read_blocking(i2c_default, ADDR, &a_test_vars[i], 1, false);
         i2c_read_blocking(i2c_default, ADDR, &reg_val, 1, false);
-//         g_test_vars[i] = g_test_vars[i] & 0x1F; 
-        // a_test_vars[i] = (a_test_vars[i] & 0xE0) >> 5;
         g_test_vars[i] = reg_val & 0x1F;
         a_test_vars[i] = (reg_val & 0xE0) >> 5;
     }
@@ -243,17 +221,11 @@ static bool mpu6050_test() {
     int16_t accel[3], gyro[3];
 
     // Enable self-test
-    mpu6050_config();
-    sleep_ms(100);
+    // mpu6050_config();
     mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
-
-    // Disable self-test
-    mpu6050_reset();   
-    mpu6050_calibrate(); 
+    mpu6050_reset();
     sleep_ms(100);
     mpu6050_read_raw(accel, gyro, &temp);
-
-    // TODO: verify if the sensor test response with self-test enabled means with offset values + config or just raw output with self test enabled
 
     for (int i = 0; i < 3; i++) {
         if (ft_accel[i] == 0.0 || ft_gyro[i] == 0.0) {
@@ -270,17 +242,16 @@ static bool mpu6050_test() {
         float accel_deviation = (scaled_self_test_accel - scaled_accel) / ft_accel[i];
         float gyro_deviation = (scaled_self_test_gyro - scaled_gyro) / ft_gyro[i];
 
+        // printf("Accel Deviation Axis %d: %.2f%%\n", i, accel_deviation * 100);
+        // printf("Gyro Deviation Axis %d: %.2f%%\n", i, gyro_deviation * 100);
 
-        printf("Accel Deviation Axis %d: %.2f%%\n", i, accel_deviation * 100);
-        printf("Gyro Deviation Axis %d: %.2f%%\n", i, gyro_deviation * 100);
-
-        // Check if deviation is within -14% to +14%
         if (accel_deviation < -0.14 || accel_deviation > 0.14 ||
             gyro_deviation < -0.14 || gyro_deviation > 0.14) {
             printf("Self-Test Failed on Axis %d\n", i);
             return false;
         }
     }
+    return true;
 }
 
 
@@ -301,6 +272,7 @@ void mpu6050_readings(){
     // Make the I2C pins available to picotool
     bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
+    // TODO call reset first to see if registers are fucked 
     int16_t acceleration[3], gyro[3], temp;
 
     /**
@@ -311,14 +283,12 @@ void mpu6050_readings(){
      * 4. If test passed then call config and calibrate again
      */
     mpu6050_reset();
-    mpu6050_config();
-    // mpu6050_calibrate();
+    mpu6050_calibrate();
     bool test = mpu6050_test();
     if (!test) {
         printf("MPU6050 test failed");
         return;
     }
-    mpu6050_config();
     mpu6050_calibrate();
 
     while (1) {
@@ -329,7 +299,7 @@ void mpu6050_readings(){
         // TODO: get deg C from register sheet.
         printf("Temp. = %f\n", (temp / 340.0) + 36.53);
 
-        sleep_ms(100);
+        sleep_ms(2000);
     }
 #endif
 }
