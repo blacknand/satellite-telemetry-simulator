@@ -109,20 +109,29 @@ static void mpu6050_calibrate() {
     for (int i = 0; i < 3; i++) {
         avg_acceleration[i] = total_acceleration[i] / samples;
         avg_gyro[i] = total_gyro[i] / samples;
+        printf("avg_accel[%i]: %i\n", i, avg_acceleration[i]);
+        printf("avg_gyro[%i]: %i\n", i, avg_gyro[i]);
     }
     avg_temp = *total_temp / samples;
     free(total_acceleration);
     free(total_gyro);
     free(total_temp);
 
+    for (int i = 0; i < 3; i++) {
+        printf("total accel: %i\n", total_acceleration[i]);
+        printf("total gyro: %i\n", total_gyro[i]);
+    }
+
     // Calculate offset values
     int16_t accel_offsets[3], gyro_offsets[3];
     for (int i = 0; i < 3; i++) {
         accel_offsets[i] = -avg_acceleration[i];
         gyro_offsets[i] = -avg_gyro[i];
-        // printf("accel_offsets[%i]: %i", i, accel_offsets[i]);
-        // printf("gyro_offsets[%i]: %i", i, gyro_offsets[i]);
+        printf("accel_offsets[%i]: %i\n", i, accel_offsets[i]);
+        printf("gyro_offsets[%i]: %i\n", i, gyro_offsets[i]);
     }
+
+    // TODO: offset values written to registers are significantly wrong 
 
     accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
     uint8_t buffer[2];
@@ -150,6 +159,9 @@ static void mpu6050_calibrate() {
         buffer[1] = gyro_offsets[i] & 0xFF;
         i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
     } 
+
+    printf("Accel Offsets: X=%d, Y=%d, Z=%d\n", accel_offsets[0], accel_offsets[1], accel_offsets[2]);
+    printf("Gyro Offsets: X=%d, Y=%d, Z=%d\n", gyro_offsets[0], gyro_offsets[1], gyro_offsets[2]);
 }
 
 
