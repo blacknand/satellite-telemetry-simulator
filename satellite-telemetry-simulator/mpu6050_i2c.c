@@ -3,6 +3,9 @@
 // Define global variables to store offsets
 int16_t accel_offsets[3] = {0, 0, 0};
 int16_t gyro_offsets[3] = {0, 0, 0};
+float filtered_accel[3] = {0.0, 0.0, 0.0};
+float filtered_gyro[3] = {0.0, 0.0, 0.0};
+#define ALPHA 0.475
 
 static void mpu6050_reset() {
     uint8_t buf[] = {0x6B, 0x80};
@@ -39,7 +42,9 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
      * from all axises
      */
     for (int i = 0; i < 3; i++) {
-        accel[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - accel_offsets[i];
+        int16_t raw_accel = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - accel_offsets[i];
+        filtered_accel[i] = ALPHA * raw_accel + (1 - ALPHA) * filtered_accel[i];
+        accel[i] = (int16_t)filtered_accel[i]; // Cast back to int16_t if needed
     }
 
     // Now gyro data from reg 0x43 for 6 bytes
@@ -48,7 +53,9 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
     i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);
 
     for (int i = 0; i < 3; i++) {
-        gyro[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - gyro_offsets[i];
+        int16_t raw_gyro = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - gyro_offsets[i];
+        filtered_gyro[i] = ALPHA * raw_gyro + (1 - ALPHA) * filtered_gyro[i];
+        gyro[i] = (int16_t)filtered_gyro[i]; // Cast back to int16_t if needed
     }
 
     // Now temperature from reg 0x41 for 2 bytes
@@ -241,21 +248,14 @@ void mpu6050_readings(){
     // TODO call reset first to see if registers are fucked 
     int16_t acceleration[3], gyro[3], temp;
 
-    /**
-     * Order of functions:
-     * 1. Call config first to configure sensor
-     * 2. Calibrate sensor for accurate readings
-     * 3. Test sensor which requires reseting sensor for raw readings
-     * 4. If test passed then call config and calibrate again
-     */
     mpu6050_reset();
-    mpu6050_calibrate();
+    // mpu6050_calibrate();
     bool test = mpu6050_test();
     if (!test) {
         printf("MPU6050 test failed");
         return;
     }
-    // mpu6050_calibrate();
+    mpu6050_calibrate();
 
     while (1) {
         mpu6050_read_raw(acceleration, gyro, &temp);
