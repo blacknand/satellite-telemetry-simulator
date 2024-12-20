@@ -1,5 +1,8 @@
 #include "mpu6050_i2c.h"
 
+// Define global variables to store offsets
+int16_t accel_offsets[3] = {0, 0, 0};
+int16_t gyro_offsets[3] = {0, 0, 0};
 
 static void mpu6050_reset() {
     uint8_t buf[] = {0x6B, 0x80};
@@ -9,7 +12,7 @@ static void mpu6050_reset() {
     // Clear sleep mode (0x6B register, 0x00 value)
     buf[1] = 0x00;  // Clear sleep mode by writing 0x00 to the 0x6B register; PWR_MGMT_1
     i2c_write_blocking(i2c_default, ADDR, buf, 2, false); 
-    sleep_ms(10);   // Allow stabilization after waking up
+    sleep_ms(100);   // Allow stabilization after waking up
 }
 
 
@@ -36,7 +39,7 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
      * from all axises
      */
     for (int i = 0; i < 3; i++) {
-        accel[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]);
+        accel[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - accel_offsets[i];
     }
 
     // Now gyro data from reg 0x43 for 6 bytes
@@ -45,7 +48,7 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
     i2c_read_blocking(i2c_default, ADDR, buffer, 6, false);
 
     for (int i = 0; i < 3; i++) {
-        gyro[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]);;
+        gyro[i] = (buffer[i * 2] << 8 | buffer[(i * 2) + 1]) - gyro_offsets[i];
     }
 
     // Now temperature from reg 0x41 for 2 bytes
@@ -54,6 +57,15 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
     i2c_read_blocking(i2c_default, ADDR, buffer, 2, false); 
 
     *temp = buffer[0] << 8 | buffer[1];
+}
+
+
+void set_offsets(int16_t accel[3], int16_t gyro[3]) {
+    for (int i = 0; i < 3; i++) {
+        accel_offsets[i] = accel[i];
+        gyro_offsets[i] = gyro[i];
+    }
+    accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
 }
 
 
@@ -66,99 +78,40 @@ static void mpu6050_calibrate() {
      * registers that store the raw data for the accelerometer and gyroscope.
      * 
      * The temperature can affec the readings
-     * so periodic recalibration is recommended
-     * 
-    Accelerometer Offsets:
-        0x06: XA_OFFS_H (High Byte of X-axis Accelerometer Offset)
-        0x07: XA_OFFS_L (Low Byte of X-axis Accelerometer Offset)
-        0x08: YA_OFFS_H (High Byte of Y-axis Accelerometer Offset)
-        0x09: YA_OFFS_L (Low Byte of Y-axis Accelerometer Offset)
-        0x0A: ZA_OFFS_H (High Byte of Z-axis Accelerometer Offset)
-        0x0B: ZA_OFFS_L (Low Byte of Z-axis Accelerometer Offset)
-    Gyroscope Offsets:
-        0x13: XG_OFFS_USRH (High Byte of X-axis Gyroscope Offset)
-        0x14: XG_OFFS_USRL (Low Byte of X-axis Gyroscope Offset)
-        0x15: YG_OFFS_USRH (High Byte of Y-axis Gyroscope Offset)
-        0x16: YG_OFFS_USRL (Low Byte of Y-axis Gyroscope Offset)
-        0x17: ZG_OFFS_USRH (High Byte of Z-axis Gyroscope Offset)
-        0x18: ZG_OFFS_USRL (Low Byte of Z-axis Gyroscope Offset)
+     * so periodic recalibration is recommended.
      */
     // [0] - X-Axis
     // [1] - Y-Axis
     // [2] - Z-Axis
     int16_t acceleration[3], gyro[3], temp;
-    int32_t* total_acceleration = (int32_t*)calloc(3, sizeof(int32_t));
-    int32_t* total_gyro = (int32_t*)calloc(3, sizeof(int32_t));
-    int32_t* total_temp = (int32_t*)malloc(sizeof(int32_t)); 
+    int32_t total_acceleration[3] = {0, 0, 0};
+    int32_t total_gyro[3] = {0, 0, 0};
+    int32_t total_temp = 0;
     int16_t avg_acceleration[3], avg_gyro[3];
-    int32_t avg_temp;
-    int samples = 1500, counter = 1500;
-    if (!total_acceleration || !total_gyro || !total_temp)
-        return;
-    while (counter) {
+    int samples = 5000;
+
+    for (int i = 0; i < samples; i++) {
         mpu6050_read_raw(acceleration, gyro, &temp);
-        for (int i = 0; i < 3; i++) {
-            total_acceleration[i] += acceleration[i];
-            total_gyro[i] += gyro[i];
+        for (int j = 0; j < 3; j++) {
+            total_acceleration[j] += acceleration[j];
+            total_gyro[j] += gyro[j];
         }
-        *total_temp += temp;
-        sleep_ms(10);   // Delay between samples
-        counter--;
+        total_temp += temp;
+        sleep_ms(10);
     }
+
     // Calculate averages
     for (int i = 0; i < 3; i++) {
         avg_acceleration[i] = total_acceleration[i] / samples;
         avg_gyro[i] = total_gyro[i] / samples;
-        printf("avg_accel[%i]: %i\n", i, avg_acceleration[i]);
-        printf("avg_gyro[%i]: %i\n", i, avg_gyro[i]);
+        printf("avg_accel[%d]: %d\n", i, avg_acceleration[i]);
+        printf("avg_gyro[%d]: %d\n", i, avg_gyro[i]);
     }
-    avg_temp = *total_temp / samples;
-    free(total_acceleration);
-    free(total_gyro);
-    free(total_temp);
-
-    for (int i = 0; i < 3; i++) {
-        printf("total accel: %i\n", total_acceleration[i]);
-        printf("total gyro: %i\n", total_gyro[i]);
-    }
+    int32_t avg_temp = total_temp / samples;
+    printf("avg_temp: %d\n", avg_temp);
 
     // Calculate offset values
-    int16_t accel_offsets[3], gyro_offsets[3];
-    for (int i = 0; i < 3; i++) {
-        accel_offsets[i] = -avg_acceleration[i];
-        gyro_offsets[i] = -avg_gyro[i];
-        printf("accel_offsets[%i]: %i\n", i, accel_offsets[i]);
-        printf("gyro_offsets[%i]: %i\n", i, gyro_offsets[i]);
-    }
-
-    // TODO: offset values written to registers are significantly wrong 
-
-    accel_offsets[2] -= 16384;       // Adjust Z-Axis for accelerometer to account for 1g (16384 LSB/g at ±2g range)
-    uint8_t buffer[2];
-    uint8_t accel_offset_regs[3] = {0x06, 0x08, 0x0A};  // XA, YA, ZA
-    uint8_t gyro_offset_regs[3] = {0x13, 0x15, 0x17};  // XG, YG, ZG
-
-    // Write the high byte and low byte to the accelerometer offset registers
-    for (int i = 0; i < 3; i++) {
-        buffer[0] = accel_offset_regs[i];
-        buffer[1] = (accel_offsets[i] >> 8) & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
-
-        buffer[0] = accel_offset_regs[i] + 1;
-        buffer[1] = accel_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
-    }
-
-    // Write the high byte and low byte to the gyroscope offset registers
-    for (int i = 0; i < 3; i++) {
-        buffer[0] = gyro_offset_regs[i];
-        buffer[1] = (gyro_offsets[i] >> 8) & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
-        
-        buffer[0] = gyro_offset_regs[i] + 1;
-        buffer[1] = gyro_offsets[i] & 0xFF;
-        i2c_write_blocking(i2c_default, ADDR, buffer, 2, false);
-    } 
+    set_offsets(avg_acceleration, avg_gyro);
 
     printf("Accel Offsets: X=%d, Y=%d, Z=%d\n", accel_offsets[0], accel_offsets[1], accel_offsets[2]);
     printf("Gyro Offsets: X=%d, Y=%d, Z=%d\n", gyro_offsets[0], gyro_offsets[1], gyro_offsets[2]);
@@ -234,6 +187,7 @@ static bool mpu6050_test() {
 
     // Enable self-test
     // mpu6050_config();
+
     mpu6050_read_raw(self_test_accel, self_test_gyro, &temp);
     mpu6050_reset();
     sleep_ms(100);
@@ -301,7 +255,7 @@ void mpu6050_readings(){
         printf("MPU6050 test failed");
         return;
     }
-    mpu6050_calibrate();
+    // mpu6050_calibrate();
 
     while (1) {
         mpu6050_read_raw(acceleration, gyro, &temp);

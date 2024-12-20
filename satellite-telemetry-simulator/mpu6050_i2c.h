@@ -22,6 +22,7 @@ static void mpu6050_config();
 static void mpu6050_calibrate();
 static bool mpu6050_test();
 void mpu6050_readings();
+void set_offsets(int16_t avg_accel[3], int16_t avg_gyro[3]);
 #endif  // i2c_default
 
 #ifdef __cplusplus
