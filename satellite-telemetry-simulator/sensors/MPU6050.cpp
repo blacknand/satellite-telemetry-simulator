@@ -40,16 +40,17 @@ void MPU6050::read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp) {
 
 void MPU6050::init() {
     // Initialize chosen serial port
-    stdio_init_all();
+    // stdio_init_all();
 
     // Initialize I2C
     i2c_init(I2C_PORT, 400 * 1000);     // 400 kHz
-    gpio_set_function(18, GPIO_FUNC_I2C);
-    gpio_set_function(19, GPIO_FUNC_I2C);
+    gpio_set_function(18, GPIO_FUNC_I2C);   // SDA
+    gpio_set_function(19, GPIO_FUNC_I2C);   // SCL
     gpio_pull_up(18);
     gpio_pull_up(19);
 
     // Reset and configure MPU6050
+    // TODO: Fix reset from getting stuck in infinite loop
     reset();
     configure();
 
