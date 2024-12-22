@@ -257,7 +257,8 @@ void mpu6050_readings(){
     }
     mpu6050_calibrate();
 
-    while (1) {
+    // while (1) {
+    for (int i = 0; i < 10; i++) {
         mpu6050_read_raw(acceleration, gyro, &temp);
 
         printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1], acceleration[2]);
