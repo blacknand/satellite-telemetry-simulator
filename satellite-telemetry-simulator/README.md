@@ -30,6 +30,13 @@ The MPU6050 measures acceleration over the X, Y, and Z-axis. This means the MPU6
     10. Check if the deviation values are within the accepted range, if so then the sensor has passed the test
 5. Calibrate after testing
 6. Read the data from the sensor
+## Sensor wiring
+| **MPU6050 Pin** | **Pico W Pin** |
+|-----------------|----------------|
+| VCC             | 3V3(OUT)       |
+| GND             | GND            |
+| SCL             | GPIO5          |
+| SDA             | GPIO4          |
 #### Sources
 - [MPU6050 Datasheet](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
 - [MPU6050 Register Map](https://www.arduino.cc/en/Guide/Mpu6050)
