@@ -71,6 +71,9 @@ uint32_t bme280_compensate_humidity(int32_t adc_H) {
 
 
 /* This function reads the manufacturing assigned compensation parameters from the device */
+// If you are familiar with the BME280 SPI example from https://github.com/raspberrypi/pico-examples/blob/master/spi/bme280_spi/bme280_spi.c
+// then you will notice that the I2C version is a bit different. The SPI version reads the compensation parameters from the device using little
+// endian format, while the I2C version reads the compensation parameters using big endian format.
 void bme280_read_compensation_paramaters() {
     uint8_t buffer[26];
 
@@ -79,9 +82,11 @@ void bme280_read_compensation_paramaters() {
     i2c_write_blocking(i2c_default, BME_280_ADDR, &reg, 1, true);
     i2c_read_blocking(i2c_default, BME_280_ADDR, buffer, 24, false);
 
+    // Temperature compensation
     dig_T1 = (buffer[1] << 8) | buffer[0];
     dig_T2 = (buffer[3] << 8) | buffer[2];
     dig_T3 = (buffer[5] << 8) | buffer[4];
+    // Pressure compensation
     dig_P1 = (buffer[7] << 8) | buffer[6];
     dig_P2 = (buffer[9] << 8) | buffer[8];
     dig_P3 = (buffer[11] << 8) | buffer[10];
@@ -101,6 +106,7 @@ void bme280_read_compensation_paramaters() {
     i2c_write_blocking(i2c_default, BME_280_ADDR, &reg, 1, true);
     i2c_read_blocking(i2c_default, BME_280_ADDR, buffer, 7, false);
 
+    // Humidity compensation
     dig_H2 = (buffer[1] << 8) | buffer[0];
     dig_H3 = buffer[2];
     dig_H4 = (buffer[3] << 4) | (buffer[4] & 0x0F);
@@ -126,7 +132,15 @@ void bme280_init() {
     config[1] = 0xA0; // Standby time 1000ms
     i2c_write_blocking(i2c_default, BME_280_ADDR, config, 2, false);
 
+    printf("BEFORE bme280_read_compensation_paramaters\n");
+    printf("dig_T1: %u, dig_T2: %d, dig_T3: %d\n", dig_T1, dig_T2, dig_T3);
+    printf("dig_P1: %u, dig_P2: %d, dig_P3: %d\n", dig_P1, dig_P2, dig_P3);
+    printf("dig_H1: %u, dig_H2: %d, dig_H3: %u, dig_H4: %d, dig_H5: %d, dig_H6: %d\n", dig_H1, dig_H2, dig_H3, dig_H4, dig_H5, dig_H6);
     bme280_read_compensation_paramaters();
+    printf("AFTER bme280_read_compensation_paramaters\n");
+    printf("dig_T1: %u, dig_T2: %d, dig_T3: %d\n", dig_T1, dig_T2, dig_T3);
+    printf("dig_P1: %u, dig_P2: %d, dig_P3: %d\n", dig_P1, dig_P2, dig_P3);
+    printf("dig_H1: %u, dig_H2: %d, dig_H3: %u, dig_H4: %d, dig_H5: %d, dig_H6: %d\n", dig_H1, dig_H2, dig_H3, dig_H4, dig_H5, dig_H6);
 }
 
 static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *temperature) {
@@ -147,11 +161,14 @@ int bme280_readings() {
 #else
     printf("BME280 reading data from sensors\n");
 
-    i2c_init(i2c_default, 100 * 1000);
-    gpio_set_function(4, GPIO_FUNC_I2C);
-    gpio_set_function(5, GPIO_FUNC_I2C);
-    gpio_pull_up(4);
-    gpio_pull_up(5);
+    // I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
+    i2c_init(i2c_default, 400 * 1000);
+    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+    // Make the I2C pins available to picotool
+    bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
     bme280_init();
 
