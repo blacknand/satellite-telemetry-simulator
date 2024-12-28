@@ -37,6 +37,20 @@ The MPU6050 measures acceleration over the X, Y, and Z-axis. This means the MPU6
 | GND             | GND            |
 | SCL             | GPIO5          |
 | SDA             | GPIO4          |
+## Pico SDK setup
+1. Copy `pico_sdk_import.cmake` into project directory
+2. Set `PICO_SDK_PATH` to location of Pico SDK, probably in `~/.pico-sdk/pico-sdk`
+3. Inlcude `pico_sdk_import.cmake` before cretating project inside of CMake list
+### Pico SDK troubleshooting
+- If the VSCode Pico extension becomes grayed out, it means VSCode cannot locate the SDK. If this happens try the following:
+    - Exectute:
+    ```
+    cd build
+    rm -rf *
+    cmake -DPICO_SDK_PATH=$PICO_SDK_PATH ..
+    make
+    ```
+    If the output is correct then it means the extension should now work again, to check, try restarting VSCode or opening the command pallete `cmd` + `shift` + `p` and select `CMake: delete cache and reconfigure`. It is also worth noting you may get a notification asking you if you would like to import from the current project. If you get this notification then select yes and create which will defenitely enable the SDK extension again
 #### Sources
 - [MPU6050 Datasheet](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
 - [MPU6050 Register Map](https://www.arduino.cc/en/Guide/Mpu6050)
