@@ -13,7 +13,8 @@ uint32_t compensate_pressure(int32_t adc_P);
 uint32_t compensate_humidity(int32_t adc_H);
 void read_compensation_parameters();
 static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *temperature);
-void bme280_readings();
+void bme280_init();
+void bme280_output();
 #endif  // BME_280_I2C_H
 
 #ifdef __cplusplus

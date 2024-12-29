@@ -131,7 +131,7 @@ static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *tempe
 }
 
 
-void bme280_readings() {
+void bme280_init() {
 #if !defined(i2c_default) || !defined(PICO_DEFAULT_I2C_SDA_PIN) || !defined(PICO_DEFAULT_I2C_SCL_PIN)
     #warning bme280_i2c.c requires a board with I2C pins
     puts("Default I2C pins were not defined");
@@ -161,22 +161,22 @@ void bme280_readings() {
     config[1] = 0x27; // Normal mode, temperature/pressure oversampling x1
     i2c_write_blocking(i2c_default, BME_280_ADDR, config, 2, false);
 
+    bme280_output();    // Output data from func instead of setting up I2C wire and then reading data each time this function is called    
+#endif
+}
+
+
+void bme280_output() {
     int32_t humidity, pressure, temperature;
 
-    // Infinite loop to read and display sensor data
-    while (1) {
-        bme280_read_raw(&humidity, &pressure, &temperature);
+    bme280_read_raw(&humidity, &pressure, &temperature);
 
-        // Convert raw data to human-readable format
-        temperature = compensate_temp(temperature);
-        pressure = compensate_pressure(pressure);
-        humidity = compensate_humidity(humidity);
+    // Convert raw data to human-readable format
+    temperature = compensate_temp(temperature);
+    pressure = compensate_pressure(pressure);
+    humidity = compensate_humidity(humidity);
 
-        printf("Humidity = %.2f%%\n", humidity / 1024.0);
-        printf("Pressure = %dPa\n", pressure);
-        printf("Temp. = %.2fC\n", temperature / 100.0);
-
-        sleep_ms(1000); // Delay for readability
-    }
-#endif
+    printf("Humidity = %.2f%%\n", humidity / 1024.0);
+    printf("Pressure = %dPa\n", pressure);
+    printf("Temp. = %.2fC\n", temperature / 100.0);
 }

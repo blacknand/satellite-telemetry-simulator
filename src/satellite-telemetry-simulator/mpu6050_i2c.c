@@ -228,7 +228,7 @@ static bool mpu6050_test() {
 }
 
 
-void mpu6050_readings(){
+void mpu6050_init(){
 #if !defined(i2c_default) || !defined(PICO_DEFAULT_I2C_SDA_PIN) || !defined(PICO_DEFAULT_I2C_SCL_PIN)
     #warning mpu6050_i2c.c requires a board with I2C pins
     puts("Default I2C pins were not defined");
@@ -245,9 +245,6 @@ void mpu6050_readings(){
     // Make the I2C pins available to picotool
     bi_decl(bi_2pins_with_func(PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
-    // TODO call reset first to see if registers are fucked 
-    int16_t acceleration[3], gyro[3], temp;
-
     mpu6050_reset();
     // mpu6050_calibrate();
     bool test = mpu6050_test();
@@ -255,18 +252,17 @@ void mpu6050_readings(){
         printf("MPU6050 test failed");
         return;
     }
+
     mpu6050_calibrate();
-
-    // while (1) {
-    for (int i = 0; i < 10; i++) {
-        mpu6050_read_raw(acceleration, gyro, &temp);
-
-        printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1], acceleration[2]);
-        printf("Gyro. X = %d, Y = %d, Z = %d\n", gyro[0], gyro[1], gyro[2]);
-        // TODO: get deg C from register sheet.
-        printf("Temp. = %f\n", (temp / 340.0) + 36.53);
-
-        sleep_ms(2000);
-    }
+    mpu6050_output();   // Output data from func instead of setting up I2C wire and then reading data each time this function is called
 #endif
+}
+
+
+void mpu6050_output() {
+    int16_t acceleration[3], gyro[3], temp;
+    mpu6050_read_raw(acceleration, gyro, &temp);
+    printf("Acc. X = %d, Y = %d, Z = %d\n", acceleration[0], acceleration[1], acceleration[2]);
+    printf("Gyro. X = %d, Y = %d, Z = %d\n", gyro[0], gyro[1], gyro[2]);
+    printf("Temp. = %f\n", (temp / 340.0) + 36.53); 
 }

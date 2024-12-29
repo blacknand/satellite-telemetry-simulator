@@ -21,7 +21,8 @@ static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t* temp);
 static void mpu6050_config();
 static void mpu6050_calibrate();
 static bool mpu6050_test();
-void mpu6050_readings();
+void mpu6050_init();
+void mpu6050_output();
 void set_offsets(int16_t avg_accel[3], int16_t avg_gyro[3]);
 #endif  // i2c_default
 
