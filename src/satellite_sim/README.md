@@ -19,8 +19,4 @@
     open satellite_sim.app
     ```
 ## Using Qt and QtMaintenance
-- If you get any CMake build errors such as 
-    ```bash
-      Failed to find required Qt component "SerialPort".
-    ```
-    then install it using the QtMaintenance app
+- If you get any CMake build errors such as ```Failed to find required Qt component "SerialPort". ``` then install it using the QtMaintenance app
