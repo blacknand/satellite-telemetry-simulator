@@ -12,15 +12,10 @@
     cmake --build build
     ```
 
-- Run using
+- Run 
 
     ```bash
-    cd satellite_sim.app/Contents/MacOS
-    ```
-
-    Alternatively
-
-    ```bash
+    cd build/satellite_sim.app/Contents/MacOS
     open satellite_sim.app
     ```
 ## Using Qt and QtMaintenance
