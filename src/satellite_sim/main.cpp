@@ -1,3 +1,9 @@
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QMainWindow>
+#include <QPlainTextEdit>
+
+
 int main(int argc, char* argv[]) {
     QApplication satellite_tim(argc, argv);
     QCoreApplication::setOrganizationName("blacknand"_L1);
@@ -15,20 +21,14 @@ int main(int argc, char* argv[]) {
     const QStringList &positionalArguments = parser.positionalArguments();
     const QString &fileName = (positionalArguments.count() > 0) ? positionalArguments.at(0)
                                                                 : QString();
+    QMainWindow mainWindow;
+    QPlainTextEdit *textEdit = new QPlainTextEdit(&mainWindow);
+    textEdit->setPlainText("Hello, World!");
 
-    MainWindow w;
-
-    // Start application only if plugins are available
-    if (!w.hasPlugins()) {
-        QMessageBox::critical(nullptr,
-                              "No viewer plugins found"_L1,
-                              "Unable to load viewer plugins. Exiting application."_L1);
-        return 1;
-    }
-
-    w.show();
-    if (!fileName.isEmpty())
-        w.openFile(fileName);
+    mainWindow.setWindowTitle(QApplication::translate("main", "SatelliteSim"_L1));
+    mainWindow.setCentralWidget(textEdit);
+    mainWindow.resize(400, 300);
+    mainWindow.show();
 
     return app.exec();
 }
