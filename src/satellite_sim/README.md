@@ -15,8 +15,7 @@
 - Run 
 
     ```bash
-    cd build/satellite_sim.app/Contents/MacOS
-    open satellite_sim.app
+    ./build/satellite_sim.app/Contents/MacOS/satellite_sim
     ```
 ## Using Qt and QtMaintenance
 - If you get any CMake build errors such as ```Failed to find required Qt component "SerialPort". ``` then install it using the QtMaintenance app
