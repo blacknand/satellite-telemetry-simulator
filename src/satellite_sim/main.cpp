@@ -5,10 +5,10 @@
 
 
 int main(int argc, char* argv[]) {
-    QApplication satellite_tim(argc, argv);
-    QCoreApplication::setOrganizationName("blacknand"_L1);
-    QCoreApplication::setApplicationName("SatelliteSim"_L1);
-    QCoreApplication::setApplicationVersion("0.1"_L1);
+    QApplication satellite_sim(argc, argv);
+    QCoreApplication::setOrganizationName("blacknand");
+    QCoreApplication::setApplicationName("SatelliteSim");
+    QCoreApplication::setApplicationVersion("0.1");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QApplication::translate("main", "A satellite telemetry simulator."));
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     parser.addVersionOption();
     // No positional arguments for now
     // parser.addPositionalArgument("config"_L1, QApplication::translate("main", "The configuration file to use."_L1));
-    parser.process(satellite_tim);
+    parser.process(satellite_sim);
 
     const QStringList &positionalArguments = parser.positionalArguments();
     const QString &fileName = (positionalArguments.count() > 0) ? positionalArguments.at(0)
@@ -25,10 +25,10 @@ int main(int argc, char* argv[]) {
     QPlainTextEdit *textEdit = new QPlainTextEdit(&mainWindow);
     textEdit->setPlainText("Hello, World!");
 
-    mainWindow.setWindowTitle(QApplication::translate("main", "SatelliteSim"_L1));
+    mainWindow.setWindowTitle(QApplication::translate("main", "SatelliteSim"));
     mainWindow.setCentralWidget(textEdit);
     mainWindow.resize(400, 300);
     mainWindow.show();
 
-    return app.exec();
+    return satellite_sim.exec();
 }
