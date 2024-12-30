@@ -1,4 +1,0 @@
-/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/satellite_sim/build/CMakeFiles/satellite_sim.dir
-/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/satellite_sim/build/CMakeFiles/edit_cache.dir
-/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/satellite_sim/build/CMakeFiles/rebuild_cache.dir
-/Users/nathanblackburn/programming/satellite-telemetry-simulator/src/satellite_sim/build/CMakeFiles/satellite_sim_autogen.dir

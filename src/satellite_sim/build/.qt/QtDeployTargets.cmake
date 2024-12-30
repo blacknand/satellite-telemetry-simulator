@@ -1,2 +1,0 @@
-set(__QT_DEPLOY_TARGET_satellite_sim_FILE /Users/nathanblackburn/programming/satellite-telemetry-simulator/src/satellite_sim/build/satellite_sim.app/Contents/MacOS/satellite_sim)
-set(__QT_DEPLOY_TARGET_satellite_sim_TYPE EXECUTABLE)
