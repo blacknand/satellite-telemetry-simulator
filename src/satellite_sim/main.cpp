@@ -1,3 +1,6 @@
+#include "mainwindow.h"
+#include "serial_port.h"
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QMainWindow>
@@ -14,21 +17,10 @@ int main(int argc, char* argv[]) {
     parser.setApplicationDescription(QApplication::translate("main", "A satellite telemetry simulator."));
     parser.addHelpOption();
     parser.addVersionOption();
-    // No positional arguments for now
-    // parser.addPositionalArgument("config"_L1, QApplication::translate("main", "The configuration file to use."_L1));
     parser.process(satellite_sim);
 
-    const QStringList &positionalArguments = parser.positionalArguments();
-    const QString &fileName = (positionalArguments.count() > 0) ? positionalArguments.at(0)
-                                                                : QString();
-    QMainWindow mainWindow;
-    QPlainTextEdit *textEdit = new QPlainTextEdit(&mainWindow);
-    textEdit->setPlainText("Hello, World!");
-
-    mainWindow.setWindowTitle(QApplication::translate("main", "SatelliteSim"));
-    mainWindow.setCentralWidget(textEdit);
-    mainWindow.resize(400, 300);
-    mainWindow.show();
+    MainWindow window;
+    window.show();
 
     return satellite_sim.exec();
 }
