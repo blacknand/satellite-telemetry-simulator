@@ -1,13 +1,13 @@
 #ifndef SERIAL_PORT_H
 #define SERIAL_PORT_H
 
-#include <QMainWindow>
+#include <<QObject>
 #include <QSerialPort>
 
 class QLabel;
 class QTimer;
 
-class SerialPort : public QMainWindow 
+class SerialPort : public QObject 
 {
     Q_OBJECT
 public:
