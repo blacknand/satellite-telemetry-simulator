@@ -6,6 +6,7 @@
 
 class QLabel;
 class QTimer;
+class MainWindow;
 
 class SerialPort : public QObject 
 {
@@ -26,6 +27,7 @@ private:
     QLabel *sp_status = nullptr;
     QTimer *sp_timer = nullptr;
     QSerialPort *sp_serial = nullptr;
+    MainWindow *m_console = nullptr;
 };
 
 #endif // SERIAL_PORT_H
