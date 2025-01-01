@@ -9,7 +9,7 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-
+    putData(const QByteArray &data);
 private:
     QPlainTextEdit *textEdit;
 };
