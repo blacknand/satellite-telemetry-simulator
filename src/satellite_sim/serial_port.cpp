@@ -5,10 +5,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QTimer>
-
-#include <chrono>
-
-static constexpr std::chrono::seconds kWriteTimeout = std::chrono::seconds{5};
+#include <iostream>
 
 
 SerialPort::SerialPort(QWidget *parent)
@@ -21,7 +18,6 @@ SerialPort::SerialPort(QWidget *parent)
 
 
 SerialPort::~SerialPort()
-// Not sure if needed but keep for now
 {
     if (sp_serial->isOpen()) { sp_serial->close(); }
 }
@@ -37,6 +33,8 @@ void SerialPort::openSerialPort()
     sp_serial->setStopBits(QSerialPort::OneStop);
     sp_serial->setFlowControl(QSerialPort::NoFlowControl);
 
+    std::cout << "serial port /dev/tty.usbmodem1101 opened" << std::endl;
+
     if (!sp_serial->open(QIODevice::ReadWrite)) 
         emit errorOccurred(sp_serial->errorString());
 }
@@ -51,14 +49,22 @@ void SerialPort::closeSerialPort()
 void SerialPort::readData()
 {
     const QByteArray data = sp_serial->readAll();
-    emit dataRecieved(data);
+    std::cout << "data received: " << data.toStdString() << std::endl;
+    emit dataRecived(data);
 }
 
 
 void SerialPort::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
+        std::cout << "error occured: " << sp_serial->errorString().toStdString() << std::endl;
         emit errorOccurred(sp_serial->errorString());
         closeSerialPort();
     }
+}
+
+
+bool SerialPort::isOpen() 
+{
+    return sp_serial->isOpen();
 }

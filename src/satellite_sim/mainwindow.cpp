@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include <iostream>
+
 
 MainWindow::MainWindow(QWidget *parent) : 
     QMainWindow(parent),
@@ -7,12 +9,15 @@ MainWindow::MainWindow(QWidget *parent) :
     bmeData(new QPlainTextEdit(this)),
     serialPort(new SerialPort(this))
 {
-    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::updateData);
+    connect(serialPort, &SerialPort::dataRecived, this, &MainWindow::updateData);
     connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::showError);
     setCentralWidget(mpuData);
 
+    serialPort->openSerialPort();
+    std::cout << "Serial port opened? " << serialPort->isOpen() << std::endl;
+
     resize(400, 300);
-    setWindowTitle("Satellite Telemetry Simulator - V0.1");
+    setWindowTitle("Satellite Telemetry Simulator - Serial port test");
 }
 
 
