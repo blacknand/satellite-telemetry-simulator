@@ -11,77 +11,54 @@
 static constexpr std::chrono::seconds kWriteTimeout = std::chrono::seconds{5};
 
 
-SerialPort::SerialPort(QWidget *parent) : 
-    QMainWindow(parent),
-    sp_ui(new SerialPort::SerialPort),
-    sp_status(new QLabel),
-    sp_timer(new QTimer),
-    sp_serial(new QSerialPort(this))
+SerialPort::SerialPort(QWidget *parent)
+    : QObject(parent),
+        sp_serial(new QSerialPort(this))    
 {
-    connect(sp_serial, &QSerialPort::errorOccured, this, &SerialPort::handleError);
-    connect(sp_serial, &QTimer::timeout, this, &SerialPort::handleWriteTimeout);
-    sp_timer->setSingleShot(true);
-    connect(sp_serial, &QSerialPort::readyRead, this, &SerialPort::readData);
-    connect(m_console, &Console::getData, this, &SerialPort::writeData);
+   connect(sp_serial, &QSerialPort::readyRead, this, &SerialPort::readData);
+   connect(sp_serial, &QSerialPort::errorOccurred, this, &SerialPort::handleError); 
 }
 
 
 SerialPort::~SerialPort()
 // Not sure if needed but keep for now
 {
-    delete sp_ui;
+    if (sp_serial->isOpen()) { sp_serial->close(); }
 }
 
-
-void SerialPort::OpenSerialPort() 
+void SerialPort::openSerialPort() 
 {
-    if (sp_serial->isOpen()) { closeSerialPort(); }
+    if (sp_serial->isOpen()) { sp_serial->close(); }
 
-    sp_serial->setPortName("/dev/tty.usbmodem1101");
+    sp_serial->setPortName("/dev/tty.usbmodem1101");        // macOS port
     sp_serial->setBaudRate(115200);
     sp_serial->setDataBits(QSerialPort::Data8);
     sp_serial->setParity(QSerialPort::NoParity);
     sp_serial->setStopBits(QSerialPort::OneStop);
     sp_serial->setFlowControl(QSerialPort::NoFlowControl);
 
-    if (sp_serial->open(QIODevice::ReadWrite)) {
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                            .arg(p.name, p.stringBaudRate, p.stringDataBits,
-                                p.stringParity, p.stringStopBits, p.stringFlowControl));
-    } else {
-        QMessageBox::critical(this, tr("Error"), sp_serial->errorString());
-        showStatusMessage(tr("Open error"));
-    }
+    if (!sp_serial->open(QIODevice::ReadWrite)) 
+        emit errorOccurred(sp_serial->errorString());
 }
 
 
-void SerialPort::CloseSerialPort() 
+void SerialPort::closeSerialPort() 
 {
-    if (sp_serial->isOpen()) {
-        sp_serial->close();
-        showStatusMessage(tr("Disconnected"));
-    }
+    if (sp_serial->isOpen()) { sp_serial->close(); }
 }
 
 
-void MainWindow::readData()
+void SerialPort::readData()
 {
     const QByteArray data = sp_serial->readAll();
-    // TODO: instead of m_console it is going to have to go into mainwindow
-    m_console->putData(data);
+    emit dataRecieved(data);
 }
 
 
-void MainWindow::handleError(QSerialPort::SerialPortError error)
+void SerialPort::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), sp_serial->errorString());
+        emit errorOccurred(sp_serial->errorString());
         closeSerialPort();
     }
-}
-
-
-void MainWindow::showStatusMessage(const QString &message)
-{
-    sp_status->setText(message);
 }

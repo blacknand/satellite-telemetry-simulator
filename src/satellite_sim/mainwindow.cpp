@@ -1,26 +1,25 @@
 #include "mainwindow.h"
-#include "serial_port.h"
-
-#include <QMainWindow>
-#include <QPlainTextEdit>
 
 
 MainWindow::MainWindow(QWidget *parent) : 
     QMainWindow(parent),
-    QPlainTextEdit(parent)
+    mpuData(new QPlainTextEdit(this)),
+    bmeData(new QPlainTextEdit(this)),
+    serialPort(new SerialPort(this))
 {
-    QPlainTextEdit *textEdit = new QPlainTextEdit;
-    textEdit->setPlainText("Hello, World!");
-    setCentralWidget(textEdit);
+    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::updateData);
+    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::showError);
+    setCentralWidget(mpuData);
+
     resize(400, 300);
-    setWindowTitle("Satellite Telemetry Simulator");
+    setWindowTitle("Satellite Telemetry Simulator - V0.1");
 }
 
 
-void MainWindow::putData(const QByteArray &data)
-{
-    insertPlainText(data);
+void MainWindow::updateData(const QByteArray &data) {
+    mpuData->appendPlainText(QString::fromUtf8(data));
+}
 
-    // QScrollBar *bar = verticalScrollBar();
-    // bar->setValue(bar->maximum());
+void MainWindow::showError(const QString &error) {
+    mpuData->appendPlainText("Error: " + error);
 }

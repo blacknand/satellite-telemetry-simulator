@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "serial_port.h"
+
 #include <QMainWindow>
 #include <QPlainTextEdit>
 
@@ -9,9 +11,14 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    putData(const QByteArray &data);
+
+public slots:
+    void updateData(const QByteArray &data);
+    void showError(const QString &error);
 private:
-    QPlainTextEdit *textEdit;
+    QPlainTextEdit *mpuData;
+    QPlainTextEdit *bmeData;
+    SerialPort *serialPort;
 };
 
 #endif // MAINWINDOW_H
