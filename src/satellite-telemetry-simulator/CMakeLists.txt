@@ -42,6 +42,12 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+# Download nlohmann::json fresh content from source 
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 project(satellite-telemetry-simulator C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
@@ -52,7 +58,9 @@ pico_sdk_init()
 add_executable(satellite-telemetry-simulator 
                 satellite_telemetry_simulator.cpp
                 mpu6050_i2c.c
-                bme280_i2c.c)
+                bme280_i2c.c
+                data_preprocessing/json_conversion.cpp
+                data_preprocessing/utc_data.cpp)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")
 pico_set_program_version(satellite-telemetry-simulator "0.1")
@@ -60,13 +68,6 @@ pico_set_program_version(satellite-telemetry-simulator "0.1")
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(satellite-telemetry-simulator 0)
 pico_enable_stdio_usb(satellite-telemetry-simulator 1)
-
-# Add the standard library to the build
-target_link_libraries(satellite-telemetry-simulator
-        pico_stdlib
-        hardware_i2c
-        pico_binary_info
-        )
 
 # Add the standard include files to the build
 target_include_directories(satellite-telemetry-simulator PRIVATE
@@ -76,13 +77,17 @@ target_include_directories(satellite-telemetry-simulator PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(satellite-telemetry-simulator 
+target_link_libraries(satellite-telemetry-simulator
+        pico_stdlib
         hardware_i2c
+        pico_binary_info
         hardware_timer
         hardware_watchdog
         hardware_clocks
         pico_cyw43_arch_lwip_threadsafe_background
-        )
+        nlohmann_json::nlohmann_json
+)
+
 
 pico_add_extra_outputs(satellite-telemetry-simulator)
 
