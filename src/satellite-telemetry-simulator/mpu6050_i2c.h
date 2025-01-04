@@ -15,7 +15,23 @@ extern "C" {
 
 #define ADDR 0x68
 
+struct MPU6050Data {
+    float accel_x;
+    float accel_y;
+    float accel_z;
+    float gyro_x;
+    float gyro_y;
+    float gyro_z;
+};
+
+struct MPUDataStruct {
+    int16_t acceleration[3];
+    int16_t gyro[3];
+    int16_t temp;
+};
+
 #ifdef i2c_default
+
 static void mpu6050_reset();
 static void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t* temp);
 static void mpu6050_config();
@@ -24,6 +40,8 @@ static bool mpu6050_test();
 void mpu6050_init();
 void mpu6050_output();
 void set_offsets(int16_t avg_accel[3], int16_t avg_gyro[3]);
+
+struct MPUDataStruct mpu6050_get_data();
 #endif  // i2c_default
 
 #ifdef __cplusplus

@@ -266,3 +266,16 @@ void mpu6050_output() {
     printf("Gyro. X = %d, Y = %d, Z = %d\n", gyro[0], gyro[1], gyro[2]);
     printf("Temp. = %f\n", (temp / 340.0) + 36.53); 
 }
+
+// TODO: return data
+struct MPUDataStruct mpu6050_return_data() {
+    int16_t acceleration[3], gyro[3], temp;
+    mpu6050_read_raw(acceleration, gyro, &temp);
+    struct MPUDataStruct return_data;
+    for (int i = 0; i < 3; i++) {
+        return_data.acceleration[i] = acceleration[i];
+        return_data.gyro[i] = gyro[i];
+    }
+    return_data.temp = temp;
+    return return_data;
+}
