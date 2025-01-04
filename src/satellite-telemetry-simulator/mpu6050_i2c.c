@@ -267,8 +267,8 @@ void mpu6050_output() {
     printf("Temp. = %f\n", (temp / 340.0) + 36.53); 
 }
 
-// TODO: return data
-struct MPUDataStruct mpu6050_return_data() {
+
+struct MPUDataStruct mpu6050_get_data() {
     int16_t acceleration[3], gyro[3], temp;
     mpu6050_read_raw(acceleration, gyro, &temp);
     struct MPUDataStruct return_data;

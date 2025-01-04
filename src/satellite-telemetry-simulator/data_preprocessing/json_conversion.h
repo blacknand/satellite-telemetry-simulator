@@ -3,9 +3,7 @@
 
 #include <chrono>
 
-#include "../json.hpp"
-#include "../sensors/bme280.h"
-#include "../sensors/MPU6050.h"
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
