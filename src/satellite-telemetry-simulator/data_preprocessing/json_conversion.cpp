@@ -4,7 +4,7 @@ namespace nlohmann {
     void nlohmann::adl_serializer<SatelliteData>::to_json(json& j, const SatelliteData& d) {
         j = json{
             {"utc data", d.utc_time}, 
-            {"sensors", 
+            {"sensor data", 
                 {"accelerometer", {
                     {"accel_x", d.accel_x},
                     {"accel_y", d.accel_y},
@@ -20,8 +20,10 @@ namespace nlohmann {
                     {"pressure (hPa)", d.pressure},
                     {"altitude (m)", d.altitude},
                     {"humidity (%)", d.humidity}
-                }}
-            }
+                }},
+            {"sensor meta data", {
+                {"mpu temperature", d.mpu_temp}
+            }}}
         };
     }
 

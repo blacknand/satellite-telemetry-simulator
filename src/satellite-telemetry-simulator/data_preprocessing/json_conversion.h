@@ -22,6 +22,10 @@ struct SatelliteData {
     float gyro_x;
     float gyro_y;
     float gyro_z;
+
+    // Satellite system data
+    // TODO: Add satellite system data
+    float mpu_temp;
 };
 
 namespace nlohmann {
