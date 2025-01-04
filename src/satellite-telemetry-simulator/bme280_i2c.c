@@ -180,3 +180,16 @@ void bme280_output() {
     printf("Pressure = %dPa\n", pressure);
     printf("Temp. = %.2fC\n", temperature / 100.0);
 }
+
+
+struct BME280Data get_bme_data() {
+    int32_t humidity, pressure, temperature;
+    bme280_read_raw(&humidity, &pressure, &temperature);
+
+    struct BME280Data data;
+    data.humidity = compensate_humidity(humidity) / 1024.0;
+    data.pressure = compensate_pressure(pressure);
+    data.temperature = compensate_temp(temperature) / 100.0;
+
+    return data;
+}

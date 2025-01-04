@@ -30,19 +30,19 @@ namespace nlohmann {
     void nlohmann::adl_serializer<SatelliteData>::from_json(const json& j, SatelliteData& d) {
         const auto& sensors = j.at("sensors");
         const auto& env = sensors.at("environment");
-        d.temperature = env.at("temperature (*C)").get<float>();
-        d.pressure    = env.at("pressure (hPa)").get<float>();
-        d.altitude    = env.at("altitude (m)").get<float>();
-        d.humidity    = env.at("humidity (%)").get<float>();
+        d.temperature = env.at("temperature (*C)").get<int32_t>();
+        d.pressure    = env.at("pressure (hPa)").get<int32_t>();
+        d.altitude    = env.at("altitude (m)").get<int32_t>();
+        d.humidity    = env.at("humidity (%)").get<int32_t>();
 
         const auto& accel = sensors.at("accelerometer");
-        d.accel_x = accel.at("accel_x").get<float>();
-        d.accel_y = accel.at("accel_y").get<float>();
-        d.accel_z = accel.at("accel_z").get<float>();
+        d.accel_x = accel.at("accel_x").get<int16_t>();
+        d.accel_y = accel.at("accel_y").get<int16_t>();
+        d.accel_z = accel.at("accel_z").get<int16_t>();
 
         const auto& gyro = sensors.at("gyroscope");
-        d.gyro_x = gyro.at("gyro_x").get<float>();
-        d.gyro_y = gyro.at("gyro_y").get<float>();
-        d.gyro_z = gyro.at("gyro_z").get<float>();
+        d.gyro_x = gyro.at("gyro_x").get<int16_t>();
+        d.gyro_y = gyro.at("gyro_y").get<int16_t>();
+        d.gyro_z = gyro.at("gyro_z").get<int16_t>();
     }
 }
