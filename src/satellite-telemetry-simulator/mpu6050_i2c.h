@@ -16,12 +16,12 @@ extern "C" {
 #define ADDR 0x68
 
 struct MPU6050Data {
-    float accel_x;
-    float accel_y;
-    float accel_z;
-    float gyro_x;
-    float gyro_y;
-    float gyro_z;
+    int16_t accel_x;
+    int16_t accel_y;
+    int16_t accel_z;
+    int16_t gyro_x;
+    int16_t gyro_y;
+    int16_t gyro_z;
 };
 
 struct MPUDataStruct {

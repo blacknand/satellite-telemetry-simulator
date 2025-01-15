@@ -1,5 +1,8 @@
 #include "mainwindow.h"
+#include "../common/satellite_data.h"
+#include "../data_preprocessing/json_conversion.h"
 
+#include <nlohmann/json.hpp>
 #include <iostream>
 
 
@@ -22,8 +25,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 void MainWindow::updateData(const QByteArray &data) {
-    mpuData->appendPlainText(QString::fromUtf8(data));
+
+    auto sensorData = j.get<SatelliteData>();
+
+    mpuData->setPlainText(QString::fromUtf8(sensorData));
 }
+
 
 void MainWindow::showError(const QString &error) {
     mpuData->appendPlainText("Error: " + error);

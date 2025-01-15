@@ -11,6 +11,9 @@ int main() {
     bme280_init();
 
     while (true) {
+        // mpu6050_output();
+        // bbme280_output();
+
         _mpu_data_struct = mpu6050_get_data();
         bme280_data = get_bme_data();
         

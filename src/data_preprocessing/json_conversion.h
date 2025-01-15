@@ -5,28 +5,9 @@
 
 #include <nlohmann/json.hpp>
 
+#include "../common/satellite_data.h"
+
 using json = nlohmann::json;
-
-struct SatelliteData {
-    std::string utc_time;
-
-    float temperature;
-    float pressure;
-    float altitude;
-    float humidity;
-
-    float accel_x;
-    float accel_y;
-    float accel_z;
-
-    float gyro_x;
-    float gyro_y;
-    float gyro_z;
-
-    // Satellite system data
-    // TODO: Add satellite system data
-    float mpu_temp;
-};
 
 namespace nlohmann {
     template<>
