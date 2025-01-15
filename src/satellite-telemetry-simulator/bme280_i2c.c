@@ -79,7 +79,17 @@ void read_compensation_parameters() {
     // Read temperature and pressure calibration data
     uint8_t reg = 0x88;
     i2c_write_blocking(i2c_default, BME_280_ADDR, &reg, 1, true); // Set register to 0x88
-    i2c_read_blocking(i2c_default, BME_280_ADDR, buffer, 24, false); // Read 24 bytes
+    int read_count = i2c_read_blocking(i2c_default, BME_280_ADDR, buffer, 24, false); // Read 24 bytes
+
+    if (read_count != 24) {
+        printf("I2C error: Could not read calibration data\n");
+        return;
+    }
+
+    printf("Raw Calibration Data:\n");
+    for (int i = 0; i < 24; i++) {
+        printf("Byte[%d]: %02X\n", i, buffer[i]);
+    }
 
     // Temperature compensation
     dig_T1 = buffer[0] | (buffer[1] << 8);
@@ -112,6 +122,10 @@ void read_compensation_parameters() {
     dig_H4 = (buffer[3] << 4) | (buffer[4] & 0x0F);
     dig_H5 = (buffer[5] << 4) | (buffer[4] >> 4);
     dig_H6 = buffer[6];
+
+    printf("Calibration Parameters:\n");
+    printf("dig_T1: %u, dig_T2: %d, dig_T3: %d\n", dig_T1, dig_T2, dig_T3);
+    printf("dig_P1: %u, dig_P2: %d, dig_P3: %d\n", dig_P1, dig_P2, dig_P3);
 }
 
 
@@ -128,6 +142,8 @@ static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *tempe
     *pressure = ((uint32_t)buffer[0] << 12) | ((uint32_t)buffer[1] << 4) | (buffer[2] >> 4);
     *temperature = ((uint32_t)buffer[3] << 12) | ((uint32_t)buffer[4] << 4) | (buffer[5] >> 4);
     *humidity = ((uint32_t)buffer[6] << 8) | buffer[7];
+
+    // printf("Raw Data - Temp: %d, Pressure: %d, Humidity: %d\n", *temperature, *pressure, *humidity);
 }
 
 
@@ -161,7 +177,8 @@ void bme280_init() {
     config[1] = 0x27; // Normal mode, temperature/pressure oversampling x1
     i2c_write_blocking(i2c_default, BME_280_ADDR, config, 2, false);
 
-    bme280_output();    // Output data from func instead of setting up I2C wire and then reading data each time this function is called    
+    printf("Initial BME280 data:\n");
+    bme280_output();
 #endif
 }
 
@@ -179,6 +196,8 @@ void bme280_output() {
     printf("Humidity = %.2f%%\n", humidity / 1024.0);
     printf("Pressure = %dPa\n", pressure);
     printf("Temp. = %.2fC\n", temperature / 100.0);
+
+    sleep_ms(1000);
 }
 
 

@@ -1,4 +1,5 @@
 #include "mpu6050_i2c.h"
+#include <stdio.h>
 
 // Define global variables to store offsets
 int16_t accel_offsets[3] = {0, 0, 0};
@@ -273,9 +274,11 @@ struct MPUDataStruct mpu6050_get_data() {
     mpu6050_read_raw(acceleration, gyro, &temp);
     struct MPUDataStruct return_data;
     for (int i = 0; i < 3; i++) {
+        // printf("Accel[%d]: %d\n", i, acceleration[i]);
+        // printf("Gyro[%d]: %d\n", i, gyro[i]);
         return_data.acceleration[i] = acceleration[i];
         return_data.gyro[i] = gyro[i];
     }
-    return_data.temp = temp;
+    return_data.temp = (temp / 340.0) + 36.53;
     return return_data;
 }

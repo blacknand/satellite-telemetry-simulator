@@ -59,8 +59,8 @@ add_executable(satellite-telemetry-simulator
                 satellite_telemetry_simulator.cpp
                 mpu6050_i2c.c
                 bme280_i2c.c
-                data_preprocessing/json_conversion.cpp
-                data_preprocessing/utc_data.cpp)
+                ../data_preprocessing/json_conversion.cpp
+                ../common/utc_data.cpp)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")
 pico_set_program_version(satellite-telemetry-simulator "0.1")
@@ -71,7 +71,8 @@ pico_enable_stdio_usb(satellite-telemetry-simulator 1)
 
 # Add the standard include files to the build
 target_include_directories(satellite-telemetry-simulator PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/data_preprocessing
+  ${CMAKE_CURRENT_LIST_DIR}/../data_preprocessing
+  ${CMAKE_CURRENT_LIST_DIR}/../common
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/..  # For common lwipopts
 )

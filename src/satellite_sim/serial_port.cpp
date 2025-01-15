@@ -22,11 +22,12 @@ SerialPort::~SerialPort()
     if (sp_serial->isOpen()) { sp_serial->close(); }
 }
 
+
 void SerialPort::openSerialPort() 
 {
     if (sp_serial->isOpen()) { sp_serial->close(); }
 
-    sp_serial->setPortName("/dev/tty.usbmodem1101");        // macOS port
+    sp_serial->setPortName("/dev/tty.usbmodem1101");        // macOS port, hardcoded for meantime
     sp_serial->setBaudRate(115200);
     sp_serial->setDataBits(QSerialPort::Data8);
     sp_serial->setParity(QSerialPort::NoParity);
@@ -49,7 +50,7 @@ void SerialPort::closeSerialPort()
 void SerialPort::readData()
 {
     const QByteArray data = sp_serial->readAll();
-    std::cout << "data received: " << data.toStdString() << std::endl;
+    // std::cout << "data received: " << data.toStdString() << std::endl;
     emit dataRecived(data);
 }
 

@@ -1,20 +1,6 @@
 #include <stdio.h>
 
-#include "pico/stdlib.h"
-#include "hardware/i2c.h"
-#include "mpu6050_i2c.h"
-#include "bme280_i2c.h"
-#include "data_preprocessing/utc_data.h"
-#include "data_preprocessing/json_conversion.h"
-
-
-using json = nlohmann::json;
-
-BME280Data bme280_data;
-MPU6050Data mpu6050_data;
-SatelliteData satellite_data;
-MPUDataStruct _mpu_data_struct;
-
+#include "satellite_telemetry_simulator.h"
 
 int main() {
 
@@ -25,6 +11,9 @@ int main() {
     bme280_init();
 
     while (true) {
+        // mpu6050_output();
+        // bbme280_output();
+
         _mpu_data_struct = mpu6050_get_data();
         bme280_data = get_bme_data();
         
@@ -43,7 +32,7 @@ int main() {
         satellite_data.utc_time = get_utc_time();
         satellite_data.mpu_temp = _mpu_data_struct.temp;
 
-        json j = satellite_data;
+        j = satellite_data;
         printf("%s\n", j.dump(4).c_str());
         
         sleep_ms(1000);

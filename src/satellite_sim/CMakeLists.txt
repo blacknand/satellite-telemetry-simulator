@@ -20,6 +20,11 @@ qt_add_executable(satellite_sim
     main.cpp
 )
 
+target_include_directories(satellite_sim 
+                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_CURRENT_SOURCE_DIR}/common
+                            ${CMAKE_CURRENT_SOURCE_DIR}/data_preprocessing)
+
 target_link_libraries(satellite_sim 
                         PRIVATE Qt6::Widgets 
                         Qt6::SerialPort 
@@ -27,5 +32,5 @@ target_link_libraries(satellite_sim
                         PRIVATE nlohmann_json::nlohmann_json)
 
 set_target_properties(satellite_sim PROPERTIES
-    MACOSX_BUNDLE ON
+    MACOSX_BUNDLE ON 
 )
