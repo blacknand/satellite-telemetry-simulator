@@ -43,7 +43,6 @@ The MPU6050 measures acceleration over the X, Y, and Z-axis. This means the MPU6
 | GND             | GND            |
 | SCK             | GPIO5          |
 | SDI             | GPIO4          |
-| SDO             | GND            |
 ## Pico SDK setup
 1. Copy `pico_sdk_import.cmake` into project directory
 2. Set `PICO_SDK_PATH` to location of Pico SDK, probably in `~/.pico-sdk/pico-sdk`
