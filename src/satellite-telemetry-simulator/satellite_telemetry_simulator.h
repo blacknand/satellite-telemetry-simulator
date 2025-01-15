@@ -20,4 +20,6 @@ MPU6050Data mpu6050_data;
 SatelliteData satellite_data;
 MPUDataStruct _mpu_data_struct;
 
+json get_satellite_json();
+
 #endif  // SATELLITE_TELEMETRY_SIMULATOR_H
