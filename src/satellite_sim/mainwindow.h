@@ -1,24 +1,29 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "serial_port.h"
+#include <nlohmann/json.hpp>
+
+#include "../common/satellite_data.h"
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
+#include <QJsonDocument>
+
+
+using json = nlohmann::json;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr, 
+                        SatelliteInterface *satelliteInterface = nullptr);
 
 public slots:
-    void updateData(const QByteArray &data);
-    void showError(const QString &error);
+    void updateData(const json &data);
 private:
-    QPlainTextEdit *mpuData;
-    QPlainTextEdit *bmeData;
-    SerialPort *serialPort;
+    QPlainTextEdit *sensorData;
+    SatelliteInterface *satelliteInterface;
 };
 
 #endif // MAINWINDOW_H

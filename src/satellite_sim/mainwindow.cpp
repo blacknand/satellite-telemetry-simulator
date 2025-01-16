@@ -1,37 +1,26 @@
 #include "mainwindow.h"
-#include "../common/satellite_data.h"
 #include "../data_preprocessing/json_conversion.h"
 
-#include <nlohmann/json.hpp>
 #include <iostream>
 
 
-MainWindow::MainWindow(QWidget *parent) : 
+MainWindow::MainWindow(QWidget *parent, SatelliteInterface *satelliteInterface) : 
     QMainWindow(parent),
-    mpuData(new QPlainTextEdit(this)),
-    bmeData(new QPlainTextEdit(this)),
-    serialPort(new SerialPort(this))
+    satelliteInterface(satelliteInterface),
+    sensorData(new QPlainTextEdit(this))
 {
-    connect(serialPort, &SerialPort::dataRecived, this, &MainWindow::updateData);
-    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::showError);
-    setCentralWidget(mpuData);
+    setCentralWidget(sensorData);
 
-    serialPort->openSerialPort();
-    std::cout << "Serial port opened? " << serialPort->isOpen() << std::endl;
+    SatelliteData data = satelliteInterface->get_satellite_data();
+    json j = data;
+    updateData(j);
 
     resize(400, 300);
-    setWindowTitle("Satellite Telemetry Simulator - Serial port test");
+    setWindowTitle("Satellite Simulator - Initial Test");
 }
 
 
-void MainWindow::updateData(const QByteArray &data) {
-
-    auto sensorData = j.get<SatelliteData>();
-
-    mpuData->setPlainText(QString::fromUtf8(sensorData));
-}
-
-
-void MainWindow::showError(const QString &error) {
-    mpuData->appendPlainText("Error: " + error);
+void MainWindow::updateData(const json &data) {
+    QString sensorDataStr = QString::fromStdString(data.dump(4));
+    sensorData->setPlainText(sensorDataStr);
 }

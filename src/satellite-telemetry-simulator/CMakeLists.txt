@@ -60,7 +60,8 @@ add_executable(satellite-telemetry-simulator
                 mpu6050_i2c.c
                 bme280_i2c.c
                 ../data_preprocessing/json_conversion.cpp
-                ../common/utc_data.cpp)
+                ../common/utc_data.cpp
+                satellite_factory.cpp)
 
 pico_set_program_name(satellite-telemetry-simulator "satellite-telemetry-simulator")
 pico_set_program_version(satellite-telemetry-simulator "0.1")

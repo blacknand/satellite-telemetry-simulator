@@ -1,6 +1,8 @@
 #ifndef SATELLITE_TELEMETRY_SIMULATOR_H
 #define SATELLITE_TELEMETRY_SIMULATOR_H
 
+#pragma once
+
 #include <nlohmann/json.hpp>
 
 #include "mpu6050_i2c.h"
@@ -15,11 +17,15 @@
 using json = nlohmann::json;
 json j;
 
+class SatelliteSensors : public SatelliteInterface {
+    public:
+        SatelliteData getSatelliteData() override;
+};
+
 BME280Data bme280_data;
 MPU6050Data mpu6050_data;
 SatelliteData satellite_data;
 MPUDataStruct _mpu_data_struct;
 
-json get_satellite_json();
 
 #endif  // SATELLITE_TELEMETRY_SIMULATOR_H

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
-#include "serial_port.h"
+#include "../common/satellite_data.h"
+#include "satellite_factory.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -19,8 +20,11 @@ int main(int argc, char* argv[]) {
     parser.addVersionOption();
     parser.process(satellite_sim);
 
-    MainWindow window;
+    SatelliteInterface* satelliteSensors = createSatelliteImplementation();
+    MainWindow window(nullptr, satelliteSensors);
     window.show();
 
-    return satellite_sim.exec();
+    int result = satellite_sim.exec();
+    delete satelliteSensors;
+    return result;
 }

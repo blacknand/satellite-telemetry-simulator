@@ -11,6 +11,7 @@ qt_standard_project_setup()     # Will still link against Qt6::Core and Qt6::Gui
 # Download nlohmann::json fresh content from source 
 include(FetchContent)
 
+# TODO: Fix the warning that is generated when the json library is downloaded
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
@@ -18,12 +19,15 @@ qt_add_executable(satellite_sim
     mainwindow.cpp
     serial_port.cpp
     main.cpp
+    satellite_factory.cpp
+    ../common/utc_data.cpp
+    ../data_preprocessing/json_conversion.cpp
 )
 
 target_include_directories(satellite_sim 
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/common
-                            ${CMAKE_CURRENT_SOURCE_DIR}/data_preprocessing)
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../common
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../data_preprocessing)
 
 target_link_libraries(satellite_sim 
                         PRIVATE Qt6::Widgets 
@@ -33,4 +37,4 @@ target_link_libraries(satellite_sim
 
 set_target_properties(satellite_sim PROPERTIES
     MACOSX_BUNDLE ON 
-)
+)   
