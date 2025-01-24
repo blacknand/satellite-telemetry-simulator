@@ -4,6 +4,8 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include <cstdint>
+#include <memory>
 
 #include "mpu6050_i2c.h"
 #include "bme280_i2c.h"
@@ -17,10 +19,7 @@
 using json = nlohmann::json;
 json j;
 
-class SatelliteSensors : public SatelliteInterface {
-    public:
-        SatelliteData getSatelliteData() override;
-};
+json get_satellite_data();
 
 BME280Data bme280_data;
 MPU6050Data mpu6050_data;

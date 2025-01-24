@@ -3,7 +3,8 @@
 #include "satellite_telemetry_simulator.h"
 #include "../common/satellite_data.h"
 
-SatelliteData SatelliteSensors::get_satellite_data() {
+
+json get_satellite_data() {
     _mpu_data_struct = mpu6050_get_data();
     bme280_data = get_bme_data();
     SatelliteData satellite_data;
@@ -23,9 +24,12 @@ SatelliteData SatelliteSensors::get_satellite_data() {
     satellite_data.utc_time = get_utc_time();
     satellite_data.mpu_temp = _mpu_data_struct.temp;
 
-    return satellite_data;
+    json _j = satellite_data;
+    return _j;
 }
 
+
+// main is only executed on the Pico
 int main() {
 
     stdio_init_all();
@@ -35,7 +39,7 @@ int main() {
     bme280_init();
 
     while (true) {
-        j = get_satellite_json();
+        j = get_satellite_data();
         printf("%s\n", j.dump(4).c_str());
         
         sleep_ms(1000);
