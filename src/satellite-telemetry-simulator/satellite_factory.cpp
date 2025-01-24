@@ -1,6 +1,9 @@
-#include "../common/satellite_data.h"
-#include "../satellite-telemetry-simulator/satellite_telemetry_simulator.h"
+#include "satellite_factory.h"
 
-SatelliteInterface* createSatelliteImplementation() {
-    return new SatelliteSensors();
+#include <memory>
+
+
+std::unique_ptr<SatelliteInterface> make_satellite_interface() {
+    return std::make_unique<SatelliteSensors>();
 }
+

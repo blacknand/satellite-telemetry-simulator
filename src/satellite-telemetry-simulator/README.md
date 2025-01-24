@@ -25,6 +25,8 @@ The MPU6050 measures acceleration over the X, Y, and Z-axis. This means the MPU6
 1. Copy `pico_sdk_import.cmake` into project directory
 2. Set `PICO_SDK_PATH` to location of Pico SDK, probably in `~/.pico-sdk/pico-sdk`
 3. Inlcude `pico_sdk_import.cmake` before cretating project inside of CMake list
+## Building project
+- Build this project via the Pico SDK VSCode extension, if you do not want to do it that way then just build like you would with any other CMake build project
 ### Pico SDK troubleshooting
 - If the VSCode Pico extension becomes grayed out, it means VSCode cannot locate the SDK, this seems to be quite a rare issue but one I ran into a lot. If this happens, try the following:
     - Exectute:

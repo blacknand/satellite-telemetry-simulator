@@ -17,14 +17,13 @@
 
 
 using json = nlohmann::json;
-json j;
 
 json get_satellite_data();
 
-BME280Data bme280_data;
-MPU6050Data mpu6050_data;
-SatelliteData satellite_data;
-MPUDataStruct _mpu_data_struct;
-
+extern BME280Data bme280_data;
+extern MPU6050Data mpu6050_data;
+extern SatelliteData satellite_data;
+extern MPUDataStruct _mpu_data_struct;
+extern json j;
 
 #endif  // SATELLITE_TELEMETRY_SIMULATOR_H

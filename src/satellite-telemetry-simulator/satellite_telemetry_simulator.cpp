@@ -4,6 +4,13 @@
 #include "../common/satellite_data.h"
 
 
+json j;
+BME280Data bme280_data;
+MPU6050Data mpu6050_data;
+SatelliteData satellite_data;
+MPUDataStruct _mpu_data_struct;
+
+
 json get_satellite_data() {
     _mpu_data_struct = mpu6050_get_data();
     bme280_data = get_bme_data();
