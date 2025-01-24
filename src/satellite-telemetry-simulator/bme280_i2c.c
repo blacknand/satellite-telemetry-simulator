@@ -207,7 +207,7 @@ struct BME280Data get_bme_data() {
 
     struct BME280Data data;
     data.humidity = compensate_humidity(humidity) / 1024.0;
-    data.pressure = compensate_pressure(pressure);
+    data.pressure = compensate_pressure(pressure) / 100.0;
     data.temperature = compensate_temp(temperature) / 100.0;
 
     return data;
