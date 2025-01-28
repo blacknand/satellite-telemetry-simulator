@@ -15,19 +15,26 @@ include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
+# GoogleTest
+FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip)
+FetchContent_MakeAvailable(googletest)
+
 qt_add_executable(satellite_sim
     mainwindow.cpp
     serial_port.cpp
     main.cpp
-    satellite_factory.cpp
+    q_satellite_factory.cpp
+    q_threads.cpp
     ../common/utc_data.cpp
     ../data_preprocessing/json_conversion.cpp
+    ../satellite-telemetry-simulator/pico_satellite_factory.cpp
 )
 
 target_include_directories(satellite_sim 
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../common
-                            ${CMAKE_CURRENT_SOURCE_DIR}/../data_preprocessing)
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../data_preprocessing
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../satellite-telemetry-simulator)
 
 target_link_libraries(satellite_sim 
                         PRIVATE Qt6::Widgets 
