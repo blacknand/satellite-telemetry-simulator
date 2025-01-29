@@ -15,10 +15,22 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     sensorData(new QPlainTextEdit(this))
 {
-    setCentralWidget(sensorData);
+    resize(1400, 1400); // Set size before placing widgets
+    setWindowTitle("Satellite Simulator - Initial Test");
 
-    timeLabel = new QLabel(this);
+    // Sensor Data Area
     sensorData = new QPlainTextEdit(this);
+    sensorData->setStyleSheet("QPlainTextEdit { background-color : black; color : white; }");
+    sensorData->setReadOnly(true); // Make read-only if only displaying data
+    sensorData->setFixedSize(1200, 1000);
+    sensorData->move(200, 200); // Centre it within the window
+
+    // Time Label
+    timeLabel = new QLabel("00:00:00", this); // Placeholder time
+    timeLabel->setAlignment(Qt::AlignRight | Qt::AlignTop);
+    timeLabel->setStyleSheet("QLabel { color : white; font-size: 16px; }");
+    timeLabel->setFixedSize(200, 50);
+    timeLabel->move(width() - timeLabel->width() - 20, 20);
 
     SatDataThread *satWorker = new SatDataThread(make_satellite_sensors());
     satWorker->moveToThread(&satDataThread);
@@ -38,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     emit startTimeThread();
     emit startSatThread();
 
-    resize(400, 300);
+    resize(1600, 1400);
     setWindowTitle("Satellite Simulator - Initial Test");
 }
 
