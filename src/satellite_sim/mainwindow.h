@@ -5,6 +5,7 @@
 
 #include "../common/satellite_data.h"
 #include "serial_port.h"
+#include "pico_flasher.h"
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
@@ -19,6 +20,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
     QThread timeThread;
     QThread satDataThread;
+    QThread uf2FlashThread;
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() = default;
@@ -31,6 +33,8 @@ public slots:
     void handleSatResults(const QByteArray &data);
     void handleTimeResults(const QString &time);
     void handleSpError(const QString &error);   
+    void handleUf2Flashed(const QProcess::ExitStatus &status);
+    void handleUf2Error(const QProcess::ProcessError &error);
 signals:
     void startSatThread();
     void startTimeThread();

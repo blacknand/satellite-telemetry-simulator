@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QChronoTimer>
 #include <QWidget>
+#include <QMessageBox>
 #include <QLabel>
 
 
@@ -38,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect(&satDataThread, &QThread::finished, satWorker, &QObject::deleteLater);
     // connect(satWorker, &SatDataThread::dataReady, this, &MainWindow::handleSatResults);
     // connect(this, &MainWindow::startSatThread, satWorker, &SatDataThread::processData);
+
     connect(serialPort, &SerialPort::dataRecived, this, &MainWindow::handleSatResults);
     connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
 
@@ -46,6 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&timeThread, &QThread::finished, timeWorker, &QObject::deleteLater);
     connect(timeWorker, &TimeThread::timeUpdated, this, &MainWindow::handleTimeResults);
     connect(this, &MainWindow::startTimeThread, timeWorker, &TimeThread::updateTime);
+
+    FlashPicoUf2File *flashUf2Worker = new FlashPicoUf2File();
+    flashUf2Worker->moveToThread(&uf2FlashThread);
+    connect(&uf2FlashThread, &QThread::finished, flashUf2Worker, &QObject::deleteLater);
+    connect(flashUf2Worker, &FlashPicoUf2File::uf2FileFlashed, this, &MainWindow::handleUf2Flashed);
+    connect(flashUf2Worker, &FlashPicoUf2File::errorOccurred, this, &MainWindow::handleUf2Error);
 
     serialPort->openSerialPort();
 
@@ -75,4 +83,58 @@ void MainWindow::handleSpError(const QString &error)
 void MainWindow::handleTimeResults(const QString &time)
 {
     timeLabel->setText(time);
+}
+
+
+void MainWindow::handleUf2Flashed(const QProcess::ExitStatus &status)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Pico UF2 file flashed");
+
+    QString statusText;
+    if (status == QProcess::NormalExit) {
+        statusText = "The process exited normally.";
+    } else {
+        statusText = "The process crashed.";
+    }
+
+    msgBox.setText(statusText);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
+
+void MainWindow::handleUf2Error(const QProcess::ProcessError &status) 
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Pico UF2 file flash error");
+
+    QString statusText;
+    switch (status) {
+        case QProcess::FailedToStart:
+            statusText = "The process failed to start.";
+            break;
+        case QProcess::Crashed:
+            statusText = "The process crashed.";
+            break;
+        case QProcess::Timedout:
+            statusText = "The process timed out.";
+            break;
+        case QProcess::WriteError:
+            statusText = "An error occurred when attempting to write to the process.";
+            break;
+        case QProcess::ReadError:
+            statusText = "An error occurred when attempting to read from the process.";
+            break;
+        case QProcess::UnknownError:
+        default:
+            statusText = "An unknown error occurred.";
+            break;
+    }
+
+    msgBox.setText(statusText);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
 }

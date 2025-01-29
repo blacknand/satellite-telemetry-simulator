@@ -23,6 +23,7 @@ qt_add_executable(satellite_sim
     mainwindow.cpp
     serial_port.cpp
     main.cpp
+    pico_flasher.cpp
     # q_satellite_factory.cpp
     q_threads.cpp
     ../common/utc_data.cpp
