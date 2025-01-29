@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "../data_preprocessing/json_conversion.h"
 #include "q_threads.h"
-#include "q_satellite_factory.h"
+#include "serial_port.h"
 
 #include <iostream>
 #include <QThread>
@@ -13,7 +13,8 @@
 
 MainWindow::MainWindow(QWidget *parent) : 
     QMainWindow(parent),
-    sensorData(new QPlainTextEdit(this))
+    sensorData(new QPlainTextEdit(this)),
+    serialPort(new SerialPort(this))
 {
     resize(1400, 1400); // Set size before placing widgets
     setWindowTitle("Satellite Simulator - Initial Test");
@@ -32,11 +33,13 @@ MainWindow::MainWindow(QWidget *parent) :
     timeLabel->setFixedSize(200, 50);
     timeLabel->move(width() - timeLabel->width() - 20, 20);
 
-    SatDataThread *satWorker = new SatDataThread(make_satellite_sensors());
-    satWorker->moveToThread(&satDataThread);
-    connect(&satDataThread, &QThread::finished, satWorker, &QObject::deleteLater);
-    connect(satWorker, &SatDataThread::dataReady, this, &MainWindow::handleSatResults);
-    connect(this, &MainWindow::startSatThread, satWorker, &SatDataThread::processData);
+    // SatDataThread *satWorker = new SatDataThread();
+    // satWorker->moveToThread(&satDataThread);
+    // connect(&satDataThread, &QThread::finished, satWorker, &QObject::deleteLater);
+    // connect(satWorker, &SatDataThread::dataReady, this, &MainWindow::handleSatResults);
+    // connect(this, &MainWindow::startSatThread, satWorker, &SatDataThread::processData);
+    connect(serialPort, &SerialPort::dataRecived, this, &MainWindow::handleSatResults);
+    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
 
     TimeThread *timeWorker = new TimeThread();
     timeWorker->moveToThread(&timeThread);
@@ -44,24 +47,32 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timeWorker, &TimeThread::timeUpdated, this, &MainWindow::handleTimeResults);
     connect(this, &MainWindow::startTimeThread, timeWorker, &TimeThread::updateTime);
 
+    serialPort->openSerialPort();
+
     timeThread.start();
-    satDataThread.start();
+    // satDataThread.start();
 
     emit startTimeThread();
-    emit startSatThread();
+    // emit startSatThread();
 
     resize(1600, 1400);
     setWindowTitle("Satellite Simulator - Initial Test");
 }
 
 
-void MainWindow::handleSatResults(const json &data)
+void MainWindow::handleSatResults(const QByteArray &data)
 {
-    sensorData->setPlainText(QString::fromStdString(data.dump(4)));
+    sensorData->setPlainText(QString::fromUtf8(data));
+}
+
+
+void MainWindow::handleSpError(const QString &error)
+{
+    std::cout << "fuck" << std::endl;
 }
 
 
 void MainWindow::handleTimeResults(const QString &time)
 {
     timeLabel->setText(time);
-}   
+}

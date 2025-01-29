@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "../common/satellite_data.h"
-#include "q_satellite_factory.h"
 
 #include <QApplication>
 #include <QCommandLineParser>

@@ -7,15 +7,11 @@
 #include <QTime>
 
 
-SatDataThread::SatDataThread(std::unique_ptr<SatelliteInterface>&& sensors) 
-    : satFactory(make_satellite_sensors()) {}
-
-
 void SatDataThread::processData()
 {
-    SatelliteData satelliteData = satFactory.get_satellite_data();
-    json j = satelliteData;
-    emit dataReady(j);
+    // SatelliteData satelliteData = satFactory.get_satellite_data();
+    // json j = satelliteData;
+    // emit dataReady(j);
 }
 
 

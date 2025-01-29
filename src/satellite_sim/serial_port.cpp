@@ -1,5 +1,3 @@
-// Serial port is not used, is kept here just if it is needed in any case
-
 #include "serial_port.h"
 
 #include <QSerialPortInfo>

@@ -3,6 +3,8 @@
 
 #include <nlohmann/json.hpp>
 #include <cstdint>
+#include <memory>
+
 
 using json = nlohmann::json;
 
@@ -27,10 +29,14 @@ struct SatelliteData {
     int16_t mpu_temp;
 };
 
-class SatelliteInterface {
-public:
-    virtual ~SatelliteInterface() = default;    // Declare a virtual destructor
-    virtual SatelliteData get_satellite_data() = 0;     // Declare a pure virtual function
-};
+
+// // Abstract base class
+// class SatelliteInterface {
+// public:
+    // virtual SatelliteData get_satellite_data() = 0;
+    // virtual ~SatelliteInterface() = default;
+// };
+
+// std::unique_ptr<SatelliteInterface> make_satellite_interface();
 
 #endif // SATELLITE_DATA_H

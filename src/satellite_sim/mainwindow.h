@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../common/satellite_data.h"
+#include "serial_port.h"
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
@@ -23,11 +24,13 @@ public:
     ~MainWindow() = default;
 private:
     QPlainTextEdit *sensorData;
-    SatelliteInterface *satelliteInterface;
+    // SatelliteInterface *satelliteInterface;
     QLabel *timeLabel;
+    SerialPort *serialPort;
 public slots:
-    void handleSatResults(const json &data);
+    void handleSatResults(const QByteArray &data);
     void handleTimeResults(const QString &time);
+    void handleSpError(const QString &error);   
 signals:
     void startSatThread();
     void startTimeThread();

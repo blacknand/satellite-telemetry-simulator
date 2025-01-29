@@ -2,11 +2,7 @@
 #define Q_THREADS_H
 
 #include "../common/satellite_data.h"
-#include "q_satellite_factory.h" 
-
-#ifndef Q_MOC_RUN
-// #include "../satellite-telemetry-simulator/pico_satellite_factory.h"     // Pico SDK header
-#endif
+// #include "q_satellite_factory.h" 
 
 #include <QThread>
 #include <QObject>
@@ -20,10 +16,10 @@ using json = nlohmann::json;
 class SatDataThread : public QObject {
     Q_OBJECT
 public:
-    SatDataThread(std::unique_ptr<SatelliteInterface>&& sensors);
+    SatDataThread() = default;
     ~SatDataThread() = default;
 private:
-    SatFactory satFactory;
+    // SatFactory satFactory;
 public slots:
     void processData();
 signals:
