@@ -1,4 +1,3 @@
-#include "../common/satellite_data.h"
 #include "../data_preprocessing/json_conversion.h"
 #include "q_threads.h"
 #include "mainwindow.h"
@@ -8,9 +7,13 @@
 #include <QTime>
 
 
-void SatDataThread::processData(const SatelliteInterface &data)
+SatDataThread::SatDataThread(std::unique_ptr<SatelliteInterface>&& sensors) 
+    : satFactory(make_satellite_sensors()) {}
+
+
+void SatDataThread::processData()
 {
-    SatelliteData satelliteData = data.get_satellite_data();
+    SatelliteData satelliteData = satFactory.get_satellite_data();
     json j = satelliteData;
     emit dataReady(j);
 }

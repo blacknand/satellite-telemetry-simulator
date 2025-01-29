@@ -1,22 +1,17 @@
-#include "satellite_factory.h"
+/**
+ * @file satellite_sim/satellite_factory.cpp
+ * @brief This file is the abstract factory implementation for the satellite simulator
+ * @paragraph
+ * This file is the abstract factory implementation for the satellite simulator which will be overriden
+ * at runtime by the compiler so the Qt app (satellite_sim) can use the Pico SDK specific implementation
+ * without actually having to build for the Pico SDK specific headers. This is done via dependency injection.
+ * Please refer to the UML diagram in the README.md file.
+ */
 
-SatelliteData MockSatelliteSensors::get_satellite_data() {
-    SatelliteData data;
-    data.utc_time = "2021-09-01T12:00:00Z";
-    data.temperature = 25;
-    data.pressure = 1013;
-    data.altitude = 0;
-    data.humidity = 50;
-    data.accel_x = 0;
-    data.accel_y = 0;
-    data.accel_z = 0;
-    data.gyro_x = 0;
-    data.gyro_y = 0;
-    data.gyro_z = 0;
-    data.mpu_temp = 25;
-    return data;
+
+#include "q_satellite_factory.h"  
+
+
+SatelliteData SatFactory::get_satellite_data() {
+    return satData->get_satellite_data();
 }
-
-SatelliteInterface* createSatelliteImplementation() {
-    return new MockSatelliteSensors();
-}   

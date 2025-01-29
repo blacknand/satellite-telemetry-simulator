@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "../data_preprocessing/json_conversion.h"
 #include "q_threads.h"
+#include "q_satellite_factory.h"
 
 #include <iostream>
 #include <QThread>
@@ -10,14 +11,20 @@
 #include <QLabel>
 
 
-MainWindow::MainWindow(QWidget *parent, SatelliteInterface *satelliteInterface) : 
+MainWindow::MainWindow(QWidget *parent) : 
     QMainWindow(parent),
-    satelliteInterface(satelliteInterface),
     sensorData(new QPlainTextEdit(this))
 {
     setCentralWidget(sensorData);
 
     timeLabel = new QLabel(this);
+    sensorData = new QPlainTextEdit(this);
+
+    SatDataThread *satWorker = new SatDataThread(make_satellite_sensors());
+    satWorker->moveToThread(&satDataThread);
+    connect(&satDataThread, &QThread::finished, satWorker, &QObject::deleteLater);
+    connect(satWorker, &SatDataThread::dataReady, this, &MainWindow::handleSatResults);
+    connect(this, &MainWindow::startSatThread, satWorker, &SatDataThread::processData);
 
     TimeThread *timeWorker = new TimeThread();
     timeWorker->moveToThread(&timeThread);
@@ -26,8 +33,10 @@ MainWindow::MainWindow(QWidget *parent, SatelliteInterface *satelliteInterface) 
     connect(this, &MainWindow::startTimeThread, timeWorker, &TimeThread::updateTime);
 
     timeThread.start();
+    satDataThread.start();
 
     emit startTimeThread();
+    emit startSatThread();
 
     resize(400, 300);
     setWindowTitle("Satellite Simulator - Initial Test");
@@ -36,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent, SatelliteInterface *satelliteInterface) 
 
 void MainWindow::handleSatResults(const json &data)
 {
-    std::cout << "handle results " << std::endl;
+    sensorData->setPlainText(QString::fromStdString(data.dump(4)));
 }
 
 

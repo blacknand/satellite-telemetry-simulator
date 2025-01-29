@@ -19,8 +19,7 @@ class MainWindow : public QMainWindow {
     QThread timeThread;
     QThread satDataThread;
 public:
-    explicit MainWindow(QWidget *parent = nullptr, 
-                        SatelliteInterface *satelliteInterface = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() = default;
 private:
     QPlainTextEdit *sensorData;
