@@ -21,14 +21,22 @@ FetchContent_MakeAvailable(googletest)
 
 qt_add_executable(satellite_sim
     mainwindow.cpp
-    serial_port.cpp
+    # serial_port.cpp
     main.cpp
     q_satellite_factory.cpp
     q_threads.cpp
     ../common/utc_data.cpp
     ../data_preprocessing/json_conversion.cpp
-    ../satellite-telemetry-simulator/pico_satellite_factory.cpp
+    mock_test.cpp
 )
+
+option(USE_PICO_SDK "Build with Pico SDK" OFF)
+if(USE_PICO_SDK)
+    add_definitions(-DPICO_SDK)
+    target_sources(satellite_sim PRIVATE ../satellite-telemetry-simulator/pico_satellite_factory.cpp)
+else()
+    target_sources(satellite_sim PRIVATE mock_test.cpp)
+endif()
 
 target_include_directories(satellite_sim 
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
