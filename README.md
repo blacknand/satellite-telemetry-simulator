@@ -1,2 +1,8 @@
-## satellite-telemetry-simulator
-Collects enviromental data and motion/attitude data mimicking sensors on a satellite. Formats, transmits and visualises the data in real time. Handles sensor integration, real-time data handling and telemetry protocols
+# Satellite simulator app
+A desktop app for simulating the way that telemetry data is collected from a orbital satellite and analysed/processed by ground stations. The simulators interface enables you to view a 3D model of the satellite by using the data from the accelerometer and gyroscope to map a 3D model. You can also send signals to the satellite the same way a real life ground station can (i.e. interrupt signals etc). The code for collecting the data from the sensors are calibrated to ensure the accuracy and consistency of the data using various filters such as a [kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) to average and correct the data while still collecting data having the affect of the data becoming more accurate as it collects more data.
+## The physical setup
+The "satellite" is a Pico W connected to a MPU6050 accelerometer and gyroscopic sensor with a BME280 enviromental sensor. The telemetry data consists of the data from these sensors as well as the Pico W statistics and health such as temperature, available RAM, CPU usage etc. To see the specific hardware wirings please either see the docs or the `src/satellite-telemetry-simulator` directory.
+## The build system
+This project has got 2 CMake builds, one for the Qt app and one for the sensor code using the Pico SDK. This keeps the build systems seperate and reduces the complexity enabling you to easily build both projects and then run the entire project via the Qt app. To see more information please see the `src` directory.
+## Docs
+This project has pretty extensive and detailed documentation. Because it is such a complex project (requires you to have the same setup to clone this and run on your local machine) you can see diagrams and videos explaning this project, the build system, the setup and anything else needed.
