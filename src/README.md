@@ -1,4 +1,9 @@
-## Data flow
-This project required importing the `SatelliteData` struct via `SatelliteSensors::get_satellite_data()`. This means that the Qt app needs to import a class and a struct which are specific
-to the Pico SDK per `CMakeLists.txt` in this directory. Because of this a default factory implementation is required so we can perform a dependency injection at run time so we can import the
-factory version of `SatelliteSensors::get_satellite_data()` and then override it at run time to get the `SatelliteData` without running into any dependency/build issues. This becomes quite difficult to trace so I have made a data flow diagram detailing it. Please consult [the data flow diagram](https://example.com/data-flow-diagram) which shows the classes and methods used and the location of where they are being imported from.
+# Satellite simulator app
+This is a macOS Qt app which provides a interface with a 3D model of an orbital satellite for monitoring and analysing the telemetry data coming from the satellite as well as the ability to send commands to the satellite. 
+## Building both for the Qt app and the sensor code
+Inside of `satellite_sim` and `satellite-telemetry-simulator` you will find `CMakeLists.txt` files for building both projects. Both projects need to be built on their own since the sensor code intefaces directly with the Pico via the Pico SDK since it provides functions to directly access and modify registers via I2C. Please see these directories for specific build instructions.
+### `src` directory structure
+- `satellite_sim` is the Qt app directory
+- `satellite-telemetry-simulator` is the implemenetation of the hardware code for monitoring the sensors as well as getting the Pico W device data
+- `common` is a non Pico SDK specific directory with useful classes used through out the whole project
+- `data_preprocessing` contains the C++ files for handling the sensor data using JSON format
