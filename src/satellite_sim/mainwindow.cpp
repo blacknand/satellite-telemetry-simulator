@@ -2,6 +2,7 @@
 #include "../data_preprocessing/json_conversion.h"
 #include "q_threads.h"
 #include "serial_port.h"
+#include "q_output_stream.h"
 
 #include <iostream>
 #include <QThread>
@@ -10,6 +11,7 @@
 #include <QWidget>
 #include <QMessageBox>
 #include <QLabel>
+#include <QTextStream>
 
 
 MainWindow::MainWindow(QWidget *parent) : 
@@ -76,7 +78,8 @@ void MainWindow::handleSatResults(const QByteArray &data)
 
 void MainWindow::handleSpError(const QString &error)
 {
-    std::cout << "fuck" << std::endl;
+    qStdout() << error << Qt::endl;
+    qStdout().flush();
 }
 
 
@@ -97,6 +100,10 @@ void MainWindow::handleUf2Flashed(const QProcess::ExitStatus &status)
     } else {
         statusText = "The process crashed.";
     }
+
+
+    qStdout() << "[INFO] MainWindow::handleUf2Flashed: " << statusText << Qt::endl;
+    qStdout().flush();
 
     msgBox.setText(statusText);
     msgBox.setIcon(QMessageBox::Information);
@@ -132,6 +139,9 @@ void MainWindow::handleUf2Error(const QProcess::ProcessError &status)
             statusText = "An unknown error occurred.";
             break;
     }
+
+    qStdout() << "[INFO] MainWindow::handleUf2Error: " << statusText << Qt::endl;
+    qStdout().flush();
 
     msgBox.setText(statusText);
     msgBox.setIcon(QMessageBox::Information);
