@@ -24,6 +24,9 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() = default;
+public:
+    void setupThreads();
+    void setupWindow();
 private:
     QPlainTextEdit *sensorData;
     // SatelliteInterface *satelliteInterface;

@@ -19,29 +19,32 @@ MainWindow::MainWindow(QWidget *parent) :
     sensorData(new QPlainTextEdit(this)),
     serialPort(new SerialPort(this))
 {
-    resize(1400, 1400); // Set size before placing widgets
+    resize(1400, 1400); 
     setWindowTitle("Satellite Simulator - Initial Test");
 
-    // Sensor Data Area
+    setupWindow();
+    setupThreads();
+}
+
+
+void MainWindow::setupWindow()
+{
     sensorData = new QPlainTextEdit(this);
     sensorData->setStyleSheet("QPlainTextEdit { background-color : black; color : white; }");
-    sensorData->setReadOnly(true); // Make read-only if only displaying data
+    sensorData->setReadOnly(true); 
     sensorData->setFixedSize(1200, 1000);
-    sensorData->move(200, 200); // Centre it within the window
+    sensorData->move(200, 200); 
 
-    // Time Label
-    timeLabel = new QLabel("00:00:00", this); // Placeholder time
+    timeLabel = new QLabel("00:00:00", this); 
     timeLabel->setAlignment(Qt::AlignRight | Qt::AlignTop);
     timeLabel->setStyleSheet("QLabel { color : white; font-size: 16px; }");
     timeLabel->setFixedSize(200, 50);
     timeLabel->move(width() - timeLabel->width() - 20, 20);
+}
 
-    // SatDataThread *satWorker = new SatDataThread();
-    // satWorker->moveToThread(&satDataThread);
-    // connect(&satDataThread, &QThread::finished, satWorker, &QObject::deleteLater);
-    // connect(satWorker, &SatDataThread::dataReady, this, &MainWindow::handleSatResults);
-    // connect(this, &MainWindow::startSatThread, satWorker, &SatDataThread::processData);
 
+void MainWindow::setupThreads() 
+{
     connect(serialPort, &SerialPort::dataRecived, this, &MainWindow::handleSatResults);
     connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
 
@@ -60,13 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
     serialPort->openSerialPort();
 
     timeThread.start();
-    // satDataThread.start();
 
     emit startTimeThread();
-    // emit startSatThread();
-
-    resize(1600, 1400);
-    setWindowTitle("Satellite Simulator - Initial Test");
 }
 
 
