@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QString>
 #include <nlohmann/json.hpp>
+#include <QJsonObject>
 
 
 using json = nlohmann::json;
@@ -47,7 +48,7 @@ private:
 private:
     QWidget *sensorDataWidget;
 public slots:
-    void handleSatResults(const QByteArray &data);
+    void handleSatResults(const QJsonObject &data);
     void handleTimeResults(const QString &time);
     void handleSpError(const QString &error);   
     void handleUf2Flashed(const QProcess::ExitStatus &status);

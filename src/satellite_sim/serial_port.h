@@ -14,14 +14,16 @@ public:
     void openSerialPort();
     void closeSerialPort();
     bool isOpen();
+    void readData();
 signals:
-    void dataReceived(const QByteArray &data);      // Send data to MainWindow
+    void dataRecieved(const QJsonObject &data);      // Send data to MainWindow
     void errorOccurred(const QString &error);        // Notify MainWindow of error
 private slots:
-    void readData();
+    void onDataRecieved();
     void handleError(QSerialPort::SerialPortError error);
 private:
     QSerialPort *sp_serial = nullptr;
+    QByteArray dataBuffer;
 };
 
 #endif // SERIAL_PORT_H

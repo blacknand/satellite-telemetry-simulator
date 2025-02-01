@@ -73,8 +73,9 @@ int main() {
     j = get_satellite_data();
     while (true) {
         j = get_satellite_data();
+        printf("START OF JSON OBJECT\n");
         printf("%s\n", j.dump(4).c_str());
-        
+        printf("END OF JSON OBJECT\n"); 
         sleep_ms(1000);
     }
     return 0;    

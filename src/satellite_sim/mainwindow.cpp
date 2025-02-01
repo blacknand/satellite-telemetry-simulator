@@ -78,7 +78,7 @@ void MainWindow::setupSensorDataWidget()
 
 void MainWindow::setupThreads() 
 {
-    connect(serialPort, &SerialPort::dataReceived, this, &MainWindow::handleSatResults);
+    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::handleSatResults);
     connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
 
     TimeThread *timeWorker = new TimeThread();
@@ -101,15 +101,10 @@ void MainWindow::setupThreads()
 }
 
 
-void MainWindow::handleSatResults(const QByteArray &data)
+void MainWindow::handleSatResults(const QJsonObject &data)
 {
-    QString dataString = QString::fromUtf8(data);
-    qStdout() << dataString << Qt::endl;
-    qStdout().flush();
-
+    temperature->setText()
 }
-
-
 
 
 void MainWindow::handleSpError(const QString &error)
