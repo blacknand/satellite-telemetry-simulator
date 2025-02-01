@@ -31,7 +31,33 @@ json get_satellite_data() {
     satellite_data.utc_time = get_utc_time();
     satellite_data.mpu_temp = _mpu_data_struct.temp;
 
-    json _j = satellite_data;
+    json _j = {
+        {"utc_data", {
+            {"UTC time", satellite_data.utc_time}
+        }},
+        {"sensor_data", {
+            {"accelerometer", {
+                {"accel_x", satellite_data.accel_x},
+                {"accel_y", satellite_data.accel_y},
+                {"accel_z", satellite_data.accel_z}
+            }},
+            {"gyroscope", {
+                {"gyro_x", satellite_data.gyro_x},
+                {"gyro_y", satellite_data.gyro_y},
+                {"gyro_z", satellite_data.gyro_z}
+            }},
+            {"environment", {
+                {"altitude (m)", satellite_data.altitude},
+                {"humidity (%)", satellite_data.humidity},
+                {"pressure (hPa)", satellite_data.pressure},
+                {"temperature (*C)", satellite_data.temperature}
+            }},
+            {"sensor_meta_data", {
+                {"mpu_temperature", satellite_data.mpu_temp}
+            }}
+        }}
+    };
+
     return _j;
 }
 
