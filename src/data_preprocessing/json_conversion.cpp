@@ -3,7 +3,7 @@
 
 namespace nlohmann { 
     void nlohmann::adl_serializer<SatelliteData>::to_json(json& j, const SatelliteData& d) {
-        std::cout << d.gyro_z << std::endl;
+        // std::cout << d.gyro_z << std::endl;
         j = json{
             {"utc data", d.utc_time}, 
             {"sensor data", 

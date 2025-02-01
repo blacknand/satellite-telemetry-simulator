@@ -44,7 +44,7 @@ int main() {
 
     mpu6050_init();
     bme280_init();
-
+    j = get_satellite_data();
     while (true) {
         j = get_satellite_data();
         printf("%s\n", j.dump(4).c_str());

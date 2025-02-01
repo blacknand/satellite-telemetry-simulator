@@ -112,17 +112,17 @@ static void mpu6050_calibrate() {
     for (int i = 0; i < 3; i++) {
         avg_acceleration[i] = total_acceleration[i] / samples;
         avg_gyro[i] = total_gyro[i] / samples;
-        printf("avg_accel[%d]: %d\n", i, avg_acceleration[i]);
-        printf("avg_gyro[%d]: %d\n", i, avg_gyro[i]);
+        // printf("avg_accel[%d]: %d\n", i, avg_acceleration[i]);
+        // printf("avg_gyro[%d]: %d\n", i, avg_gyro[i]);
     }
     int32_t avg_temp = total_temp / samples;
-    printf("avg_temp: %d\n", avg_temp);
+    // printf("avg_temp: %d\n", avg_temp);
 
     // Calculate offset values
     set_offsets(avg_acceleration, avg_gyro);
 
-    printf("Accel Offsets: X=%d, Y=%d, Z=%d\n", accel_offsets[0], accel_offsets[1], accel_offsets[2]);
-    printf("Gyro Offsets: X=%d, Y=%d, Z=%d\n", gyro_offsets[0], gyro_offsets[1], gyro_offsets[2]);
+    // printf("Accel Offsets: X=%d, Y=%d, Z=%d\n", accel_offsets[0], accel_offsets[1], accel_offsets[2]);
+    // printf("Gyro Offsets: X=%d, Y=%d, Z=%d\n", gyro_offsets[0], gyro_offsets[1], gyro_offsets[2]);
 }
 
 
@@ -235,7 +235,7 @@ void mpu6050_init(){
     puts("Default I2C pins were not defined");
     return 0;
 #else
-    printf("MPU6050 reading data from registers...\n");
+    // printf("MPU6050 reading data from registers...\n");
 
     // I2C0 on the default SDA and SCL pins (4, 5 on a Pico)
     i2c_init(i2c_default, 400 * 1000);
@@ -255,7 +255,7 @@ void mpu6050_init(){
     }
 
     mpu6050_calibrate();
-    mpu6050_output();   // Output data from func instead of setting up I2C wire and then reading data each time this function is called
+    // mpu6050_output();   // Output data from func instead of setting up I2C wire and then reading data each time this function is called
 #endif
 }
 

@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <nlohmann/json.hpp>
-
 #include "../common/satellite_data.h"
 #include "serial_port.h"
 #include "pico_flasher.h"
@@ -12,6 +10,8 @@
 #include <QJsonDocument>
 #include <QLabel>
 #include <QThread>
+#include <QString>
+#include <nlohmann/json.hpp>
 
 
 using json = nlohmann::json;
@@ -27,11 +27,25 @@ public:
 public:
     void setupThreads();
     void setupWindow();
+    void setupSensorDataWidget();
 private:
     QPlainTextEdit *sensorData;
-    // SatelliteInterface *satelliteInterface;
     QLabel *timeLabel;
     SerialPort *serialPort;
+private:
+    QLabel *temperature;
+    QLabel *pressure;
+    QLabel *altitude;
+    QLabel *humidity;
+    QLabel *accel_x;
+    QLabel *accel_y;
+    QLabel *accel_z;
+    QLabel *gyro_x;
+    QLabel *gyro_y;
+    QLabel *gyro_z;
+    QLabel *mpu_temp;
+private:
+    QWidget *sensorDataWidget;
 public slots:
     void handleSatResults(const QByteArray &data);
     void handleTimeResults(const QString &time);

@@ -86,10 +86,10 @@ void read_compensation_parameters() {
         return;
     }
 
-    printf("Raw Calibration Data:\n");
-    for (int i = 0; i < 24; i++) {
-        printf("Byte[%d]: %02X\n", i, buffer[i]);
-    }
+    // printf("Raw Calibration Data:\n");
+    // for (int i = 0; i < 24; i++) {
+    //     printf("Byte[%d]: %02X\n", i, buffer[i]);
+    // }
 
     // Temperature compensation
     dig_T1 = buffer[0] | (buffer[1] << 8);
@@ -123,9 +123,9 @@ void read_compensation_parameters() {
     dig_H5 = (buffer[5] << 4) | (buffer[4] >> 4);
     dig_H6 = buffer[6];
 
-    printf("Calibration Parameters:\n");
-    printf("dig_T1: %u, dig_T2: %d, dig_T3: %d\n", dig_T1, dig_T2, dig_T3);
-    printf("dig_P1: %u, dig_P2: %d, dig_P3: %d\n", dig_P1, dig_P2, dig_P3);
+    // printf("Calibration Parameters:\n");
+    // printf("dig_T1: %u, dig_T2: %d, dig_T3: %d\n", dig_T1, dig_T2, dig_T3);
+    // printf("dig_P1: %u, dig_P2: %d, dig_P3: %d\n", dig_P1, dig_P2, dig_P3);
 }
 
 
@@ -153,7 +153,7 @@ void bme280_init() {
     puts("Default I2C pins were not defined");
     return;
 #else
-    printf("BME280 reading data from registers...\n");
+    // printf("BME280 reading data from registers...\n");
 
     // Initialize I2C
     i2c_init(i2c_default, 400 * 1000);
@@ -177,8 +177,8 @@ void bme280_init() {
     config[1] = 0x27; // Normal mode, temperature/pressure oversampling x1
     i2c_write_blocking(i2c_default, BME_280_ADDR, config, 2, false);
 
-    printf("Initial BME280 data:\n");
-    bme280_output();
+    // printf("Initial BME280 data:\n");
+    // bme280_output();
 #endif
 }
 

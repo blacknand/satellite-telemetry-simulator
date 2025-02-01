@@ -1,4 +1,5 @@
 #include "serial_port.h"
+#include "q_output_stream.h"
 
 #include <QSerialPortInfo>
 #include <QSerialPort>
@@ -6,14 +7,23 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <iostream>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 
 SerialPort::SerialPort(QWidget *parent)
     : QObject(parent),
         sp_serial(new QSerialPort(this))    
 {
+    sp_serial = new QSerialPort(this);
+
    connect(sp_serial, &QSerialPort::readyRead, this, &SerialPort::readData);
    connect(sp_serial, &QSerialPort::errorOccurred, this, &SerialPort::handleError); 
+
+    // QTimer *readTimer = new QTimer(this);
+    // connect(readTimer, &QTimer::timeout, this, &SerialPort::readData);
+    // readTimer->start(1000); // Read every 50ms instead of every available byte
 }
 
 
@@ -50,9 +60,12 @@ void SerialPort::closeSerialPort()
 void SerialPort::readData()
 {
     const QByteArray data = sp_serial->readAll();
-    // std::cout << "data received: " << data.toStdString() << std::endl;
-    emit dataRecived(data);
+    emit dataReceived(data);
+
+
 }
+
+
 
 
 void SerialPort::handleError(QSerialPort::SerialPortError error)

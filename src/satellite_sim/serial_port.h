@@ -14,9 +14,8 @@ public:
     void openSerialPort();
     void closeSerialPort();
     bool isOpen();
-
 signals:
-    void dataRecived(const QByteArray &data);      // Send data to MainWindow
+    void dataReceived(const QByteArray &data);      // Send data to MainWindow
     void errorOccurred(const QString &error);        // Notify MainWindow of error
 private slots:
     void readData();
