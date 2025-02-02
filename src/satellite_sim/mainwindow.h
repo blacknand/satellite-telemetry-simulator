@@ -31,20 +31,21 @@ public:
     void setupSensorDataWidget();
 private:
     QPlainTextEdit *sensorData;
-    QLabel *timeLabel;
     SerialPort *serialPort;
 private:
+    QLabel *timeLabel;
     QLabel *temperature;
     QLabel *pressure;
     QLabel *altitude;
     QLabel *humidity;
-    QLabel *accel_x;
-    QLabel *accel_y;
-    QLabel *accel_z;
-    QLabel *gyro_x;
-    QLabel *gyro_y;
-    QLabel *gyro_z;
-    QLabel *mpu_temp;
+    QLabel *accelX;
+    QLabel *accelY;
+    QLabel *accelZ;
+    QLabel *gyroX;
+    QLabel *gyroY;
+    QLabel *gyroZ;
+    QLabel *mpuTemperature;
+    QLabel *utcLabel;
 private:
     QWidget *sensorDataWidget;
 public slots:

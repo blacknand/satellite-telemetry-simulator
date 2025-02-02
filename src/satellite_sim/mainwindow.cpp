@@ -29,14 +29,15 @@ MainWindow::MainWindow(QWidget *parent) :
     pressure = new QLabel("Pressure: 0", this);
     altitude = new QLabel("Altitude: 0", this);
     humidity = new QLabel("Humidity: 0", this);
-    accel_x = new QLabel("Accel X: 0", this);
-    accel_y = new QLabel("Accel Y: 0", this);
-    accel_z = new QLabel("Accel Z: 0", this);
-    gyro_x = new QLabel("Gyro X: 0", this);
-    gyro_y = new QLabel("Gyro Y: 0", this);
-    gyro_z = new QLabel("Gyro Z: 0", this);
-    mpu_temp = new QLabel("MPU Temp: 0", this);
+    accelX = new QLabel("Accel X: 0", this);
+    accelY = new QLabel("Accel Y: 0", this);
+    accelZ = new QLabel("Accel Z: 0", this);
+    gyroX = new QLabel("Gyro X: 0", this);
+    gyroY = new QLabel("Gyro Y: 0", this);
+    gyroZ = new QLabel("Gyro Z: 0", this);
+    mpuTemperature = new QLabel("MPU Temp: 0", this);
 
+    utcLabel = new QLabel("00:00:00", this);
     timeLabel = new QLabel("00:00:00", this);
 
     setupWindow();
@@ -66,13 +67,14 @@ void MainWindow::setupSensorDataWidget()
     sensorDataLayout->addWidget(pressure);
     sensorDataLayout->addWidget(altitude);
     sensorDataLayout->addWidget(humidity);
-    sensorDataLayout->addWidget(accel_x);
-    sensorDataLayout->addWidget(accel_y);
-    sensorDataLayout->addWidget(accel_z);
-    sensorDataLayout->addWidget(gyro_x);
-    sensorDataLayout->addWidget(gyro_y);
-    sensorDataLayout->addWidget(gyro_z);
-    sensorDataLayout->addWidget(mpu_temp);
+    sensorDataLayout->addWidget(accelX);
+    sensorDataLayout->addWidget(accelY);
+    sensorDataLayout->addWidget(accelZ);
+    sensorDataLayout->addWidget(gyroX);
+    sensorDataLayout->addWidget(gyroY);
+    sensorDataLayout->addWidget(gyroZ);
+    sensorDataLayout->addWidget(mpuTemperature);
+    sensorDataLayout->addWidget(utcLabel);
 }
 
 
@@ -103,7 +105,53 @@ void MainWindow::setupThreads()
 
 void MainWindow::handleSatResults(const QJsonObject &data)
 {
-    temperature->setText()
+    // Access "sensor_data"
+    QJsonObject sensorData = data["sensor_data"].toObject();
+
+    // Access "accelerometer"
+    QJsonObject accelerometer = sensorData["accelerometer"].toObject();
+    int accelXData = accelerometer["accel_x"].toInt();
+    int accelYData = accelerometer["accel_y"].toInt();
+    int accelZData = accelerometer["accel_z"].toInt();
+
+    // Access Data"gyroscope"
+    QJsonObject gyroscope = sensorData["gyroscope"].toObject();
+    int gyroXData = gyroscope["gyro_x"].toInt();
+    int gyroYData = gyroscope["gyro_y"].toInt();
+    int gyroZData = gyroscope["gyro_z"].toInt();
+
+    // Access "environment"
+    QJsonObject environment = sensorData["environment"].toObject();
+    int altitudeData = environment["altitude (m)"].toInt();
+    int humidityData = environment["humidity (%)"].toInt();
+    int pressureData = environment["pressure (hPa)"].toInt();
+    int temperatureData = environment["temperature (*C)"].toInt();
+
+    // Access "sensor_meta_data"
+    QJsonObject metaData = sensorData["sensor_meta_data"].toObject();
+    int mpuTemperatureData = metaData["mpu_temperature"].toInt();
+
+    // Access UTC data
+    QJsonObject utcData = data["utc_data"].toObject();
+    QString utcTime = utcData["UTC time"].toString();
+
+    accelX->setText("Accel. X: " + QString::number(accelXData));
+    accelY->setText("Accel. Y: " + QString::number(accelYData));
+    accelZ->setText("Accel. Z: " + QString::number(accelZData));
+
+    gyroX->setText("Gyro. X: " + QString::number(gyroXData));
+    gyroY->setText("Gyro. Y: " + QString::number(gyroYData));
+    gyroZ->setText("Gyro. Z: " + QString::number(gyroZData));
+
+    altitude->setText("Altitude: " + QString::number(altitudeData) + " m");
+    humidity->setText("Humidity: " + QString::number(humidityData) + " %");
+    pressure->setText("Pressure" + QString::number(pressureData) + " hPa");
+    temperature->setText("Temeperature: " + QString::number(temperatureData) + " °C");
+
+    mpuTemperature->setText("MPU Temperature: " + QString::number(mpuTemperatureData) + " °C");
+
+    // Optional: Display UTC time
+    utcLabel->setText("UTC time: " + utcTime);
 }
 
 
