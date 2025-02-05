@@ -1,3 +1,5 @@
+> [!WARNING]
+> This project is still in active development. It is not ready for release
 # Satellite simulator app
 A desktop app for simulating the way that telemetry data is collected from a orbital satellite and analysed/processed by ground stations. The simulators interface enables you to view a 3D model of the satellite by using the data from the accelerometer and gyroscope to map a 3D model. You can also send signals to the satellite the same way a real life ground station can (i.e. interrupt signals etc). The code for collecting the data from the sensors are calibrated to ensure the accuracy and consistency of the data using various filters such as a [kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) to average and correct the data while still collecting data having the affect of the data becoming more accurate as it collects more data. The satellite (Pico W) communicates wirelessley with the laptop (ground station) using TCP and UDP over Wi-Fi.
 ## Filtering
