@@ -38,14 +38,16 @@ void SerialPort::openSerialPort()
 {
     if (sp_serial->isOpen()) { sp_serial->close(); }
 
-    sp_serial->setPortName("/dev/tty.usbmodem1101");        // macOS port, hardcoded for meantime
+    const QString serialPortName = "/dev/tty.usbmodem1201";
+    sp_serial->setPortName(serialPortName);        // macOS port, hardcoded for meantime
     sp_serial->setBaudRate(115200);
     sp_serial->setDataBits(QSerialPort::Data8);
     sp_serial->setParity(QSerialPort::NoParity);
     sp_serial->setStopBits(QSerialPort::OneStop);
     sp_serial->setFlowControl(QSerialPort::NoFlowControl);
 
-    std::cout << "serial port /dev/tty.usbmodem1101 opened" << std::endl;
+    std::string portName = serialPortName.toStdString();
+    std::cout << "serial port " << portName << " opened" << std::endl;
 
     if (!sp_serial->open(QIODevice::ReadWrite)) 
         emit errorOccurred(sp_serial->errorString());

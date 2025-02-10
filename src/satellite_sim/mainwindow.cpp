@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     serialPort(new SerialPort(this))
 {
-    resize(1400, 1400);
+    resize(1800, 1400);
     setWindowTitle("Satellite Simulator - Initial Test");
 
     // Create QLabel objects (only once)
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     utcLabel = new QLabel("00:00:00", this);
     timeLabel = new QLabel("00:00:00", this);
 
-    telemButton = new QPushButton("&Change telemetry data collection rate", this);
+    // telemButton = new QPushButton("&TEST", this);
 
     setupWindow();
     setupThreads();
@@ -53,29 +53,33 @@ void MainWindow::setupWindow()
     QWidget *mainWidget = new QWidget(this);
     QGridLayout *mainLayout = new QGridLayout(mainWidget);
 
-    setupSensorDataWidget();
-    setupConsolesWidget();
-    setupButtonWidget();
-    setup3dWidget();
+    setupSensorDataWidget();  // Create and set up sensor data widget
+    setupConsolesWidget();    // Create and set up consoles widget
+    setupButtonWidget();      // Create and set up button widget
+    setup3dWidget();          // Create and set up 3D widget
 
-    // Add widgets to the grid layout
-    mainLayout->addWidget(sensorDataWidget, 0, 0, 2, 1);  // Telemetry data
-    mainLayout->addWidget(buttonWidget, 0, 2, 2, 1);      // Buttons
-    mainLayout->addWidget(satellite3dWidget, 0, 1);       // 3D Satellite
-    mainLayout->addLayout(consolesLayout, 1, 0, 1, 3);    // Consoles span all columns
+    // Adjusting widget sizes
+    sensorDataWidget->setFixedWidth(350);   // Reduce telemetry data width
+    buttonWidget->setFixedWidth(400);       // Reduce buttons widget width
+    errorTerminal->setFixedWidth(400);      // Narrow error terminal
+    outputTerminal->setFixedWidth(400);     // Narrow output terminal
+
+    // Add widgets to the grid layout with fixed positioning
+    mainLayout->addWidget(sensorDataWidget, 0, 0, 2, 1);  // Telemetry data on the left
+    mainLayout->addWidget(satellite3dWidget, 0, 1);       // 3D Satellite in the center
+    mainLayout->addWidget(buttonWidget, 0, 2, 1, 1);      // Buttons on the right
+    mainLayout->addWidget(errorTerminal, 1, 1, 1, 1);     // Error terminal (left in bottom row)
+    mainLayout->addWidget(outputTerminal, 1, 2, 1, 1);    // Output terminal (right in bottom row)
 
     mainWidget->setLayout(mainLayout);
     setCentralWidget(mainWidget);
 }
 
-
 void MainWindow::setupSensorDataWidget()
 {
-    // Create and populate sensor data widget
     sensorDataWidget = new QWidget(this);
     QVBoxLayout *sensorDataLayout = new QVBoxLayout(sensorDataWidget);
 
-    // Add sensor data labels/widgets
     sensorDataLayout->addWidget(temperature);
     sensorDataLayout->addWidget(pressure);
     sensorDataLayout->addWidget(altitude);
@@ -88,53 +92,58 @@ void MainWindow::setupSensorDataWidget()
     sensorDataLayout->addWidget(gyroZ);
     sensorDataLayout->addWidget(mpuTemperature);
     sensorDataLayout->addWidget(utcLabel);
-}
 
+    // Add border for clarity
+    sensorDataWidget->setStyleSheet("border: 2px solid red;");
+}
 
 void MainWindow::setupConsolesWidget()
 {
-    // Create a horizontal layout for consoles
-    consolesLayout = new QHBoxLayout();
+    // Create console widgets
+    errorTerminal = new QLabel("Error Terminal Placeholder", this);
+    outputTerminal = new QLabel("Output Terminal Placeholder", this);
 
-    // Add widgets for error and output terminals
-    QLabel *errorTerminal = new QLabel("Error Terminal Placeholder", this);
-    QLabel *outputTerminal = new QLabel("Output Terminal Placeholder", this);
+    // Ensure they have fixed sizes to prevent overlap
+    errorTerminal->setFixedSize(180, 100);
+    outputTerminal->setFixedSize(180, 100);
 
-    consolesLayout->addWidget(errorTerminal);
-    consolesLayout->addWidget(outputTerminal);
+    // Add borders for clarity
+    errorTerminal->setStyleSheet("border: 2px solid blue;");
+    outputTerminal->setStyleSheet("border: 2px solid blue;");
 }
-
 
 void MainWindow::setupButtonWidget()
 {
-    // Create and populate button widget
     buttonWidget = new QWidget(this);
     QVBoxLayout *buttonLayout = new QVBoxLayout(buttonWidget);
 
-    telemButton = new QPushButton("&Change telemetry collection rate", this);
-    buttonLayout->addWidget(telemButton);
+    QPushButton *exampleButton1 = new QPushButton("Change telemetry collection rate", this);
+    QPushButton *exampleButton2 = new QPushButton("Example Button", this);
+    buttonLayout->addWidget(exampleButton1);
+    buttonLayout->addWidget(exampleButton2);
 
-    // Add buttons to the layout
-    QPushButton *exampleButton = new QPushButton("Example Button", this);
-    buttonLayout->addWidget(exampleButton);
+    // Reduce width of buttons and button widget
+    buttonWidget->setFixedWidth(200);
+    exampleButton1->setFixedWidth(180);
+    exampleButton2->setFixedWidth(180);
 
-    // Add more buttons as needed
+    // Add border for clarity
+    buttonWidget->setStyleSheet("border: 2px solid green;");
 }
-
 
 void MainWindow::setup3dWidget()
 {
-    // Create a widget for the 3D satellite
     satellite3dWidget = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(satellite3dWidget);
 
-    // Placeholder content for the 3D satellite
     QLabel *satellitePlaceholder = new QLabel("3D Satellite Placeholder", this);
     satellitePlaceholder->setAlignment(Qt::AlignCenter);
-
-    // Apply a layout (optional)
-    QVBoxLayout *layout = new QVBoxLayout(satellite3dWidget);
     layout->addWidget(satellitePlaceholder);
+
+    // Add border for clarity
+    satellite3dWidget->setStyleSheet("border: 2px solid yellow;");
 }
+
 
 
 void MainWindow::setupThreads() 

@@ -51,7 +51,10 @@ private:
     QLabel *gyroZ;
     QLabel *mpuTemperature;
     QLabel *utcLabel;
-    
+
+    QLabel *errorTerminal;
+    QLabel *outputTerminal;
+
     QPushButton *telemButton;
     
     QWidget *sensorDataWidget;
