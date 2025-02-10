@@ -15,6 +15,7 @@
 #include <QGridLayout>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QPushButton>
 
 
 MainWindow::MainWindow(QWidget *parent) : 
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     utcLabel = new QLabel("00:00:00", this);
     timeLabel = new QLabel("00:00:00", this);
 
+    telemButton = new QPushButton("&Change telemetry data collection rate", this);
+
     setupWindow();
     setupThreads();
 }
@@ -50,19 +53,29 @@ void MainWindow::setupWindow()
     QWidget *mainWidget = new QWidget(this);
     QGridLayout *mainLayout = new QGridLayout(mainWidget);
 
-    setupSensorDataWidget();  // Create sensor data widget
+    setupSensorDataWidget();
+    setupConsolesWidget();
+    setupButtonWidget();
+    setup3dWidget();
 
-    mainLayout->addWidget(sensorDataWidget, 0, 0); // Add it to layout
-    
+    // Add widgets to the grid layout
+    mainLayout->addWidget(sensorDataWidget, 0, 0, 2, 1);  // Telemetry data
+    mainLayout->addWidget(buttonWidget, 0, 2, 2, 1);      // Buttons
+    mainLayout->addWidget(satellite3dWidget, 0, 1);       // 3D Satellite
+    mainLayout->addLayout(consolesLayout, 1, 0, 1, 3);    // Consoles span all columns
+
     mainWidget->setLayout(mainLayout);
-    setCentralWidget(mainWidget);  // Make this the main window content
+    setCentralWidget(mainWidget);
 }
 
 
 void MainWindow::setupSensorDataWidget()
 {
-    sensorDataWidget = new QWidget(this);  // Ensure it's assigned to class member
+    // Create and populate sensor data widget
+    sensorDataWidget = new QWidget(this);
     QVBoxLayout *sensorDataLayout = new QVBoxLayout(sensorDataWidget);
+
+    // Add sensor data labels/widgets
     sensorDataLayout->addWidget(temperature);
     sensorDataLayout->addWidget(pressure);
     sensorDataLayout->addWidget(altitude);
@@ -75,6 +88,52 @@ void MainWindow::setupSensorDataWidget()
     sensorDataLayout->addWidget(gyroZ);
     sensorDataLayout->addWidget(mpuTemperature);
     sensorDataLayout->addWidget(utcLabel);
+}
+
+
+void MainWindow::setupConsolesWidget()
+{
+    // Create a horizontal layout for consoles
+    consolesLayout = new QHBoxLayout();
+
+    // Add widgets for error and output terminals
+    QLabel *errorTerminal = new QLabel("Error Terminal Placeholder", this);
+    QLabel *outputTerminal = new QLabel("Output Terminal Placeholder", this);
+
+    consolesLayout->addWidget(errorTerminal);
+    consolesLayout->addWidget(outputTerminal);
+}
+
+
+void MainWindow::setupButtonWidget()
+{
+    // Create and populate button widget
+    buttonWidget = new QWidget(this);
+    QVBoxLayout *buttonLayout = new QVBoxLayout(buttonWidget);
+
+    telemButton = new QPushButton("&Change telemetry collection rate", this);
+    buttonLayout->addWidget(telemButton);
+
+    // Add buttons to the layout
+    QPushButton *exampleButton = new QPushButton("Example Button", this);
+    buttonLayout->addWidget(exampleButton);
+
+    // Add more buttons as needed
+}
+
+
+void MainWindow::setup3dWidget()
+{
+    // Create a widget for the 3D satellite
+    satellite3dWidget = new QWidget(this);
+
+    // Placeholder content for the 3D satellite
+    QLabel *satellitePlaceholder = new QLabel("3D Satellite Placeholder", this);
+    satellitePlaceholder->setAlignment(Qt::AlignCenter);
+
+    // Apply a layout (optional)
+    QVBoxLayout *layout = new QVBoxLayout(satellite3dWidget);
+    layout->addWidget(satellitePlaceholder);
 }
 
 
@@ -94,6 +153,8 @@ void MainWindow::setupThreads()
     // connect(&uf2FlashThread, &QThread::finished, flashUf2Worker, &QObject::deleteLater);
     // connect(flashUf2Worker, &FlashPicoUf2File::uf2FileFlashed, this, &MainWindow::handleUf2Flashed);
     // connect(flashUf2Worker, &FlashPicoUf2File::errorOccurred, this, &MainWindow::handleUf2Error);
+
+    
 
     serialPort->openSerialPort();
 

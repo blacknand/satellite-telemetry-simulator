@@ -13,6 +13,8 @@
 #include <QString>
 #include <nlohmann/json.hpp>
 #include <QJsonObject>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 
 using json = nlohmann::json;
@@ -29,6 +31,9 @@ public:
     void setupThreads();
     void setupWindow();
     void setupSensorDataWidget();
+    void setupConsolesWidget();
+    void setupButtonWidget();
+    void setup3dWidget();
 private:
     QPlainTextEdit *sensorData;
     SerialPort *serialPort;
@@ -46,8 +51,13 @@ private:
     QLabel *gyroZ;
     QLabel *mpuTemperature;
     QLabel *utcLabel;
-private:
+    
+    QPushButton *telemButton;
+    
     QWidget *sensorDataWidget;
+    QWidget *buttonWidget;
+    QWidget *satellite3dWidget;
+    QHBoxLayout *consolesLayout;    
 public slots:
     void handleSatResults(const QJsonObject &data);
     void handleTimeResults(const QString &time);
