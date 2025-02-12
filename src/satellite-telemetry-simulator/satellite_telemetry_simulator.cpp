@@ -1,6 +1,14 @@
 #include <stdio.h>
+#include <atomic>
+#include <chrono>
+// #include <thread>
+
+#include "pico/stdlib.h"
+#include "pico/multicore.h"
+#include "pico/mutex.h"         // ?
 
 #include "satellite_telemetry_simulator.h"
+#include "collect_telemetry.h"
 #include "../common/satellite_data.h"
 
 
@@ -9,13 +17,19 @@ BME280Data bme280_data;
 MPU6050Data mpu6050_data;
 SatelliteData satellite_data;
 MPUDataStruct _mpu_data_struct;
+bool calibrated;
 
+// Global atomic flag to check if collect_telemetry function needs to be terminated
+std::atomic<bool> stop_telemetry = false;
+int std_delay = 1000;
+// std::thread telemetry_thread;
 
 json get_satellite_data() {
     _mpu_data_struct = mpu6050_get_data();
     bme280_data = get_bme_data();
     SatelliteData satellite_data;
-    
+   
+    // Get the satellite data and assign to the satellite_data struct
     satellite_data.accel_x = _mpu_data_struct.acceleration[0];
     satellite_data.accel_y = _mpu_data_struct.acceleration[1];
     satellite_data.accel_z = _mpu_data_struct.acceleration[2];
@@ -31,6 +45,7 @@ json get_satellite_data() {
     satellite_data.utc_time = get_utc_time();
     satellite_data.mpu_temp = _mpu_data_struct.temp;
 
+    // Construct the JSON object with the satellite data
     json _j = {
         {"utc_data", {
             {"UTC time", satellite_data.utc_time}
@@ -62,21 +77,60 @@ json get_satellite_data() {
 }
 
 
+// void core1_entry() {
+//     multicore_fifo_push_blocking(123);
+//     uint32_t g = multicore_fifo_pop_blocking();
+
+//     if (g != 123) 
+//         printf("Error has occured on core 1");
+
+//     while (1)
+//         tight_loop_contents();
+// }
+
+
+void collect_telemetry() {
+    // Change the rate at which telemetry data is collected 
+    while (!stop_telemetry.load()) {
+        j = get_satellite_data();
+        printf("START OF JSON OBJECT\n");
+        printf("%s\n", j.dump(4).c_str());
+        printf("END OF JSON OBJECT\n"); 
+        // Pause the thread for the delay specified in milliseconds
+        // std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        sleep_ms(std_delay);
+    } 
+}
+
+
+void set_telemetry_delay(int delay) {
+    std_delay = delay;
+}
+
+
 // main is only executed on the Pico
 int main() {
-
+    calibrated = false;
     stdio_init_all();
     sleep_ms(100);      // Allow device to stabalise
 
     mpu6050_init();
     bme280_init();
+    calibrated = true;
     j = get_satellite_data();
-    while (true) {
-        j = get_satellite_data();
-        printf("START OF JSON OBJECT\n");
-        printf("%s\n", j.dump(4).c_str());
-        printf("END OF JSON OBJECT\n"); 
-        sleep_ms(1000);
-    }
+    
+    set_telemetry_delay(1000);
+    multicore_launch_core1(collect_telemetry);
+    printf("Main core running other tasks...\n");
+    sleep_ms(5000);
+    stop_telemetry.store(true);
+
+    set_telemetry_delay(2000);
+    multicore_launch_core1(collect_telemetry);
+    printf("Main core running other tasks...\n");
+    sleep_ms(5000);
+    stop_telemetry.store(true);
+
+
     return 0;    
 }

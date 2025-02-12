@@ -4,7 +4,12 @@
 #include "serial_port.h"
 #include "q_output_stream.h"
 
+// C++ standard headers
 #include <iostream>
+#include <atomic>
+#include <chrono>
+
+// Qt specific headers
 #include <QThread>
 #include <QTimer>
 #include <QChronoTimer>
@@ -75,6 +80,7 @@ void MainWindow::setupWindow()
     setCentralWidget(mainWidget);
 }
 
+
 void MainWindow::setupSensorDataWidget()
 {
     sensorDataWidget = new QWidget(this);
@@ -97,6 +103,7 @@ void MainWindow::setupSensorDataWidget()
     sensorDataWidget->setStyleSheet("border: 2px solid red;");
 }
 
+
 void MainWindow::setupConsolesWidget()
 {
     // Create console widgets
@@ -111,6 +118,7 @@ void MainWindow::setupConsolesWidget()
     errorTerminal->setStyleSheet("border: 2px solid blue;");
     outputTerminal->setStyleSheet("border: 2px solid blue;");
 }
+
 
 void MainWindow::setupButtonWidget()
 {
@@ -131,6 +139,7 @@ void MainWindow::setupButtonWidget()
     buttonWidget->setStyleSheet("border: 2px solid green;");
 }
 
+
 void MainWindow::setup3dWidget()
 {
     satellite3dWidget = new QWidget(this);
@@ -143,7 +152,6 @@ void MainWindow::setup3dWidget()
     // Add border for clarity
     satellite3dWidget->setStyleSheet("border: 2px solid yellow;");
 }
-
 
 
 void MainWindow::setupThreads() 
@@ -162,8 +170,6 @@ void MainWindow::setupThreads()
     // connect(&uf2FlashThread, &QThread::finished, flashUf2Worker, &QObject::deleteLater);
     // connect(flashUf2Worker, &FlashPicoUf2File::uf2FileFlashed, this, &MainWindow::handleUf2Flashed);
     // connect(flashUf2Worker, &FlashPicoUf2File::errorOccurred, this, &MainWindow::handleUf2Error);
-
-    
 
     serialPort->openSerialPort();
 
