@@ -21,8 +21,7 @@ bool calibrated;
 
 // Global atomic flag to check if collect_telemetry function needs to be terminated
 std::atomic<bool> stop_telemetry = false;
-int std_delay = 1000;
-// std::thread telemetry_thread;
+std::atomic<int> telemetry_delay = 1000;            // Initial value
 
 json get_satellite_data() {
     _mpu_data_struct = mpu6050_get_data();
@@ -77,34 +76,25 @@ json get_satellite_data() {
 }
 
 
-// void core1_entry() {
-//     multicore_fifo_push_blocking(123);
-//     uint32_t g = multicore_fifo_pop_blocking();
-
-//     if (g != 123) 
-//         printf("Error has occured on core 1");
-
-//     while (1)
-//         tight_loop_contents();
-// }
-
-
 void collect_telemetry() {
-    // Change the rate at which telemetry data is collected 
-    while (!stop_telemetry.load()) {
-        j = get_satellite_data();
-        printf("START OF JSON OBJECT\n");
-        printf("%s\n", j.dump(4).c_str());
-        printf("END OF JSON OBJECT\n"); 
-        // Pause the thread for the delay specified in milliseconds
-        // std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-        sleep_ms(std_delay);
-    } 
+    while (true) {
+        // Change the rate at which telemetry data is collected 
+        if (!stop_telemetry.load()) {
+            j = get_satellite_data();
+            printf("START OF JSON OBJECT\n");
+            printf("%s\n", j.dump(4).c_str());
+            printf("END OF JSON OBJECT\n"); 
+            sleep_ms(telemetry_delay.load());   // Use the dynamic delay
+        }  else {
+            // If stopped just yield idle CPU time at 100 ms 
+            sleep_ms(100); 
+        }
+    }    
 }
 
 
-void set_telemetry_delay(int delay) {
-    std_delay = delay;
+void set_telemetry_delay(int new_delay) {
+    telemetry_delay.store(new_delay);
 }
 
 
@@ -118,19 +108,36 @@ int main() {
     bme280_init();
     calibrated = true;
     j = get_satellite_data();
-    
-    set_telemetry_delay(1000);
-    multicore_launch_core1(collect_telemetry);
-    printf("Main core running other tasks...\n");
-    sleep_ms(5000);
-    stop_telemetry.store(true);
 
-    set_telemetry_delay(2000);
-    multicore_launch_core1(collect_telemetry);
-    printf("Main core running other tasks...\n");
-    sleep_ms(5000);
-    stop_telemetry.store(true);
+    /**
+     * The Pico W has 2 cores, core 0 and core 1. Obviously core 0 is used for the main thread of execution
+     * and core 1 can be started using multicore_launch_core1, once core 1 has been started it cannot be terminated
+     * like normal threads can be so it will be forever running, because of this instead we need to use the atomic value
+     * to dynamically change the value of the atomic value on the main thread during program execution and then constantly
+     * check it on core 1 to see if the telemetry_collection process needs to stop at any point
+     */
+   
+    printf("Offloading collect telemetry to core 1\n");
+    multicore_launch_core1(collect_telemetry);          // Start the core 1 thread
 
+    // Start
+    stop_telemetry.store(false);
+    printf("Putting main core to sleep for 5 seconds\n");
+    sleep_ms(5000);
+
+    // Stop
+    stop_telemetry.store(true);
+    printf("Thread 1 has stopped executing collect_telemetry\n");
+
+    // Change delay and restart collection
+    set_telemetry_delay(3000);
+    printf("Starting exectution on thread 1 with new delay set\n");
+    stop_telemetry.store(false);
+    sleep_ms(5000);
+
+    // Stop collection
+    stop_telemetry.store(true);
+    printf("Thread 1 has finished executing stop_telemetry\n");
 
     return 0;    
 }
