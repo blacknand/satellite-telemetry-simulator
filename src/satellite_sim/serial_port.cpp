@@ -62,6 +62,37 @@ void SerialPort::closeSerialPort()
 
 void SerialPort::readData()
 {
+    /*
+    A JSON object will look like this:
+    START OF JSON OBJECT
+    {
+        "sensor_data": {
+            "accelerometer": {
+                "accel_x": -12,
+                "accel_y": 46,
+                "accel_z": 16432
+            },
+            "environment": {
+                "altitude (m)": -858547940,
+                "humidity (%)": 39,
+                "pressure (hPa)": 1021,
+                "temperature (*C)": 26
+            },
+            "gyroscope": {
+                "gyro_x": 13,
+                "gyro_y": -2,
+                "gyro_z": 27
+            },
+            "sensor_meta_data": {
+                "mpu_temperature": 27
+            }
+        },
+        "utc_data": {
+            "UTC time": "UTC time: 1970-1-1T0:1:1\n"
+        }
+    }
+    END OF JSON OBJECT
+    */
     while (true) {
         // Find the start of a JSON object
         int startIndex = dataBuffer.indexOf("START OF JSON OBJECT");
@@ -143,4 +174,10 @@ void SerialPort::handleError(QSerialPort::SerialPortError error)
 bool SerialPort::isOpen() 
 {
     return sp_serial->isOpen();
+}
+
+
+void SerialPort::writeCommand(const QByteArray &data) 
+{
+    sp_serial->write(data);
 }

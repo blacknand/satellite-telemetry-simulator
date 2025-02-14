@@ -15,6 +15,7 @@
 #include <QJsonObject>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QSignalMapper>
 
 
 using json = nlohmann::json;
@@ -30,6 +31,7 @@ public:
 public:
     void setupThreads();
     void setupWindow();
+    void setupConnections();
     void setupSensorDataWidget();
     void setupConsolesWidget();
     void setupButtonWidget();
@@ -61,6 +63,8 @@ private:
     QWidget *buttonWidget;
     QWidget *satellite3dWidget;
     QHBoxLayout *consolesLayout;    
+
+    QSignalMapper *signalMapper;
 public slots:
     void handleSatResults(const QJsonObject &data);
     void handleTimeResults(const QString &time);
@@ -70,6 +74,7 @@ public slots:
 signals:
     void startSatThread();
     void startTimeThread();
+    void changeTelemetryRateClicked(const QByteArray &data);
 };
 
 #endif // MAINWINDOW_H

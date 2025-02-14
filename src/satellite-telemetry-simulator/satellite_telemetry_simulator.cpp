@@ -8,7 +8,7 @@
 #include "pico/mutex.h"         // ?
 
 #include "satellite_telemetry_simulator.h"
-#include "collect_telemetry.h"
+#include "set_telemetry.h"
 #include "../common/satellite_data.h"
 
 
@@ -21,7 +21,7 @@ bool calibrated;
 
 // Global atomic flag to check if collect_telemetry function needs to be terminated
 std::atomic<bool> stop_telemetry = false;
-std::atomic<int> telemetry_delay = 1000;            // Initial value
+std::atomic<int> telemetry_delay = 1000;            // Initial value, 1 full second
 
 json get_satellite_data() {
     _mpu_data_struct = mpu6050_get_data();
@@ -94,6 +94,7 @@ void collect_telemetry() {
 
 
 void set_telemetry_delay(int new_delay) {
+    // stop_telemetry.store()
     telemetry_delay.store(new_delay);
 }
 
@@ -115,6 +116,9 @@ int main() {
      * like normal threads can be so it will be forever running, because of this instead we need to use the atomic value
      * to dynamically change the value of the atomic value on the main thread during program execution and then constantly
      * check it on core 1 to see if the telemetry_collection process needs to stop at any point
+     * 
+     * Both cores must always be busy, i.e. while core 1 is collecting and outputting the data core 0 must also be 
+     * doing something so it needs to be busy when it is not switching the telemetry collection rate
      */
    
     printf("Offloading collect telemetry to core 1\n");
@@ -123,21 +127,21 @@ int main() {
     // Start
     stop_telemetry.store(false);
     printf("Putting main core to sleep for 5 seconds\n");
-    sleep_ms(5000);
+    while (true) { sleep_ms(10000); }
 
-    // Stop
-    stop_telemetry.store(true);
-    printf("Thread 1 has stopped executing collect_telemetry\n");
+    // // Stop
+    // stop_telemetry.store(true);
+    // printf("Thread 1 has stopped executing collect_telemetry\n");
 
-    // Change delay and restart collection
-    set_telemetry_delay(3000);
-    printf("Starting exectution on thread 1 with new delay set\n");
-    stop_telemetry.store(false);
-    sleep_ms(5000);
+    // // Change delay and restart collection
+    // set_telemetry_delay(3000);
+    // printf("Starting exectution on thread 1 with new delay set\n");
+    // stop_telemetry.store(false);
+    // sleep_ms(5000);
 
-    // Stop collection
-    stop_telemetry.store(true);
-    printf("Thread 1 has finished executing stop_telemetry\n");
+    // // Stop collection
+    // stop_telemetry.store(true);
+    // printf("Thread 1 has finished executing stop_telemetry\n");
 
     return 0;    
 }

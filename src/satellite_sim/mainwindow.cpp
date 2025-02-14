@@ -1,3 +1,8 @@
+// @author Nathan Blackburn <nblackburndeveloper@icloud.com>
+// This file is the GUI of the simulator app, it defines all methods
+// and attributes inside of MainWindow for display
+
+
 #include "mainwindow.h"
 #include "../data_preprocessing/json_conversion.h"
 #include "q_threads.h"
@@ -30,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     resize(1800, 1400);
     setWindowTitle("Satellite Simulator - Initial Test");
 
-    // Create QLabel objects (only once)
+    // Create QLabel objects (only once) so they are displayed immediately
+    // NOTE: This may be unecessary, test in future
     temperature = new QLabel("Temperature: 0", this);
     pressure = new QLabel("Pressure: 0", this);
     altitude = new QLabel("Altitude: 0", this);
@@ -47,34 +53,36 @@ MainWindow::MainWindow(QWidget *parent) :
     timeLabel = new QLabel("00:00:00", this);
 
     // telemButton = new QPushButton("&TEST", this);
+    signalMapper = new QSignalMapper(this);
 
     setupWindow();
-    setupThreads();
+    setupConnections();     // Setup connections between buttons, signal maps etc.
+    setupThreads();         // Setup the thread connections
+    serialPort->openSerialPort();       // Open the serial port after connections have been established
 }
 
 
 void MainWindow::setupWindow()
+// Setup the main window
 {
     QWidget *mainWidget = new QWidget(this);
     QGridLayout *mainLayout = new QGridLayout(mainWidget);
 
-    setupSensorDataWidget();  // Create and set up sensor data widget
-    setupConsolesWidget();    // Create and set up consoles widget
-    setupButtonWidget();      // Create and set up button widget
-    setup3dWidget();          // Create and set up 3D widget
+    setupSensorDataWidget();  
+    setupConsolesWidget();    
+    setupButtonWidget();      
+    setup3dWidget();          
 
-    // Adjusting widget sizes
-    sensorDataWidget->setFixedWidth(350);   // Reduce telemetry data width
-    buttonWidget->setFixedWidth(400);       // Reduce buttons widget width
-    errorTerminal->setFixedWidth(400);      // Narrow error terminal
-    outputTerminal->setFixedWidth(400);     // Narrow output terminal
+    sensorDataWidget->setFixedWidth(350);   
+    buttonWidget->setFixedWidth(400);       
+    errorTerminal->setFixedWidth(400);      
+    outputTerminal->setFixedWidth(400);     
 
-    // Add widgets to the grid layout with fixed positioning
-    mainLayout->addWidget(sensorDataWidget, 0, 0, 2, 1);  // Telemetry data on the left
-    mainLayout->addWidget(satellite3dWidget, 0, 1);       // 3D Satellite in the center
-    mainLayout->addWidget(buttonWidget, 0, 2, 1, 1);      // Buttons on the right
-    mainLayout->addWidget(errorTerminal, 1, 1, 1, 1);     // Error terminal (left in bottom row)
-    mainLayout->addWidget(outputTerminal, 1, 2, 1, 1);    // Output terminal (right in bottom row)
+    mainLayout->addWidget(sensorDataWidget, 0, 0, 2, 1);        // Telemetry data on the left
+    mainLayout->addWidget(satellite3dWidget, 0, 1);             // 3D Satellite in the center
+    mainLayout->addWidget(buttonWidget, 0, 2, 1, 1);            // Buttons on the right
+    mainLayout->addWidget(errorTerminal, 1, 1, 1, 1);           // Error terminal (left in bottom row)
+    mainLayout->addWidget(outputTerminal, 1, 2, 1, 1);          // Output terminal (right in bottom row)
 
     mainWidget->setLayout(mainLayout);
     setCentralWidget(mainWidget);
@@ -82,6 +90,7 @@ void MainWindow::setupWindow()
 
 
 void MainWindow::setupSensorDataWidget()
+// Setup the telemetry data
 {
     sensorDataWidget = new QWidget(this);
     QVBoxLayout *sensorDataLayout = new QVBoxLayout(sensorDataWidget);
@@ -99,48 +108,54 @@ void MainWindow::setupSensorDataWidget()
     sensorDataLayout->addWidget(mpuTemperature);
     sensorDataLayout->addWidget(utcLabel);
 
-    // Add border for clarity
+    // TODO: Remove border when styling finalised
     sensorDataWidget->setStyleSheet("border: 2px solid red;");
 }
 
 
 void MainWindow::setupConsolesWidget()
+// Not too sure about having console widgets
+// but the general idea is to have a console for the output
+// and have another console for any errors that have occured
 {
-    // Create console widgets
     errorTerminal = new QLabel("Error Terminal Placeholder", this);
     outputTerminal = new QLabel("Output Terminal Placeholder", this);
 
-    // Ensure they have fixed sizes to prevent overlap
     errorTerminal->setFixedSize(180, 100);
     outputTerminal->setFixedSize(180, 100);
 
-    // Add borders for clarity
+    // TODO: Remove border when styling finalised
     errorTerminal->setStyleSheet("border: 2px solid blue;");
     outputTerminal->setStyleSheet("border: 2px solid blue;");
 }
 
 
 void MainWindow::setupButtonWidget()
+// Setup the buttons on the right side of the app
+// Button connections are handeled inside of setupConnections
+// See documentation for more information
 {
     buttonWidget = new QWidget(this);
     QVBoxLayout *buttonLayout = new QVBoxLayout(buttonWidget);
 
-    QPushButton *exampleButton1 = new QPushButton("Change telemetry collection rate", this);
+    QPushButton *telemButton = new QPushButton("Change telemetry collection rate", this);
     QPushButton *exampleButton2 = new QPushButton("Example Button", this);
-    buttonLayout->addWidget(exampleButton1);
+    buttonLayout->addWidget(telemButton);
     buttonLayout->addWidget(exampleButton2);
 
-    // Reduce width of buttons and button widget
     buttonWidget->setFixedWidth(200);
-    exampleButton1->setFixedWidth(180);
+    telemButton->setFixedWidth(180);
     exampleButton2->setFixedWidth(180);
 
-    // Add border for clarity
+    // TODO: Remove border when styling finalised
     buttonWidget->setStyleSheet("border: 2px solid green;");
 }
 
 
 void MainWindow::setup3dWidget()
+// The 3D satellite object widget
+// TODO: Implement the 3D object
+// NOTE: This feature will probably be the feature to be implemented last
 {
     satellite3dWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(satellite3dWidget);
@@ -149,33 +164,46 @@ void MainWindow::setup3dWidget()
     satellitePlaceholder->setAlignment(Qt::AlignCenter);
     layout->addWidget(satellitePlaceholder);
 
-    // Add border for clarity
+    // TODO: Remove border when styling finalised
     satellite3dWidget->setStyleSheet("border: 2px solid yellow;");
 }
 
 
 void MainWindow::setupThreads() 
+// Setup the thread connections
 {
-    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::handleSatResults);
-    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
-
     TimeThread *timeWorker = new TimeThread();
     timeWorker->moveToThread(&timeThread);
     connect(&timeThread, &QThread::finished, timeWorker, &QObject::deleteLater);
     connect(timeWorker, &TimeThread::timeUpdated, this, &MainWindow::handleTimeResults);
     connect(this, &MainWindow::startTimeThread, timeWorker, &TimeThread::updateTime);
 
+    // TODO: Implement the UF2 file flashing
     // FlashPicoUf2File *flashUf2Worker = new FlashPicoUf2File();
     // flashUf2Worker->moveToThread(&uf2FlashThread);
     // connect(&uf2FlashThread, &QThread::finished, flashUf2Worker, &QObject::deleteLater);
     // connect(flashUf2Worker, &FlashPicoUf2File::uf2FileFlashed, this, &MainWindow::handleUf2Flashed);
     // connect(flashUf2Worker, &FlashPicoUf2File::errorOccurred, this, &MainWindow::handleUf2Error);
 
-    serialPort->openSerialPort();
+    // When button is clicked I want to emit something like
+    // [COMM] CHANGE TELEMETRY RATE TO 1.25X
+    // connect(telemButton, &QPushButton::clicked, signalMapper, &QSignalMapper::map);
+    // signalMapper->setMapping(telemButton, "[COMM] Change telemetry rate to 1.25x");
+    // connect(signalMapper, &QSignalMapper::mappedString, this, &)
+
 
     timeThread.start();
 
-    emit startTimeThread();
+    emit startTimeThread();     // Emit signal to trigger
+}
+
+
+void MainWindow::setupConnections()
+// Setup the button and other object connections
+{
+    // Setup the serial port connections
+    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::handleSatResults);
+    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
 }
 
 
