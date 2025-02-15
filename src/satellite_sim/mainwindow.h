@@ -74,7 +74,7 @@ public slots:
 signals:
     void startSatThread();
     void startTimeThread();
-    void changeTelemetryRateClicked(const QByteArray &data);
+    void changeTelemetryRateClicked(const QString &data);
 };
 
 #endif // MAINWINDOW_H

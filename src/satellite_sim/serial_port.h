@@ -15,10 +15,12 @@ public:
     void closeSerialPort();
     bool isOpen();
     void readData();
-    void writeCommand(const QByteArray &data);
+    // void writeCommand(const QByteArray &data);
 signals:
     void dataRecieved(const QJsonObject &data);      // Send data to MainWindow
     void errorOccurred(const QString &error);        // Notify MainWindow of error
+public slots:
+    void writeCommand(const QString &data);
 private slots:
     void onDataRecieved();
     void handleError(QSerialPort::SerialPortError error);

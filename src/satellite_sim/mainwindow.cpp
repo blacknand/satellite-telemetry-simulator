@@ -138,7 +138,7 @@ void MainWindow::setupButtonWidget()
     buttonWidget = new QWidget(this);
     QVBoxLayout *buttonLayout = new QVBoxLayout(buttonWidget);
 
-    QPushButton *telemButton = new QPushButton("Change telemetry collection rate", this);
+    telemButton = new QPushButton("Change telemetry collection rate", this);
     QPushButton *exampleButton2 = new QPushButton("Example Button", this);
     buttonLayout->addWidget(telemButton);
     buttonLayout->addWidget(exampleButton2);
@@ -172,6 +172,7 @@ void MainWindow::setup3dWidget()
 void MainWindow::setupThreads() 
 // Setup the thread connections
 {
+    // Setup time thread to update time every second
     TimeThread *timeWorker = new TimeThread();
     timeWorker->moveToThread(&timeThread);
     connect(&timeThread, &QThread::finished, timeWorker, &QObject::deleteLater);
@@ -185,13 +186,8 @@ void MainWindow::setupThreads()
     // connect(flashUf2Worker, &FlashPicoUf2File::uf2FileFlashed, this, &MainWindow::handleUf2Flashed);
     // connect(flashUf2Worker, &FlashPicoUf2File::errorOccurred, this, &MainWindow::handleUf2Error);
 
-    // When button is clicked I want to emit something like
-    // [COMM] CHANGE TELEMETRY RATE TO 1.25X
-    // connect(telemButton, &QPushButton::clicked, signalMapper, &QSignalMapper::map);
-    // signalMapper->setMapping(telemButton, "[COMM] Change telemetry rate to 1.25x");
-    // connect(signalMapper, &QSignalMapper::mappedString, this, &)
 
-
+    // Start the threads
     timeThread.start();
 
     emit startTimeThread();     // Emit signal to trigger
@@ -202,8 +198,15 @@ void MainWindow::setupConnections()
 // Setup the button and other object connections
 {
     // Setup the serial port connections
-    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::handleSatResults);
-    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);
+    connect(serialPort, &SerialPort::dataRecieved, this, &MainWindow::handleSatResults);                    // SerialPort::dataRecieved signal to MainWindow::handleSatResults slot
+    connect(serialPort, &SerialPort::errorOccurred, this, &MainWindow::handleSpError);                      // SerialPort::errorOccurred signal to MainWindow::handleSpError slot
+    connect(this, &MainWindow::changeTelemetryRateClicked, serialPort, &SerialPort::writeCommand);          // MainWindow::changeTelemetryRateClicked signal to SerialPort::writeCommand slot
+
+    // When button is clicked I want to emit something like
+    // [COMM] CHANGE TELEMETRY RATE TO 1.25X
+    connect(telemButton, &QPushButton::clicked, signalMapper, qOverload<>(&QSignalMapper::map));
+    signalMapper->setMapping(telemButton, "[COMM] Change telemetry rate to 1.25x");
+    connect(signalMapper, &QSignalMapper::mappedString, this, &MainWindow::changeTelemetryRateClicked);
 }
 
 

@@ -177,7 +177,7 @@ bool SerialPort::isOpen()
 }
 
 
-void SerialPort::writeCommand(const QByteArray &data) 
+void SerialPort::writeCommand(const QString &data) 
 {
     sp_serial->write(data);
 }
