@@ -35,29 +35,12 @@ MainWindow::MainWindow(QWidget *parent) :
     resize(1800, 1400);
     setWindowTitle("Satellite Simulator - Initial Test");
 
-    // Create QLabel objects (only once) so they are displayed immediately
-    // NOTE: This may be unecessary, test in future
-    temperature = new QLabel("Temperature: 0", this);
-    pressure = new QLabel("Pressure: 0", this);
-    altitude = new QLabel("Altitude: 0", this);
-    humidity = new QLabel("Humidity: 0", this);
-    accelX = new QLabel("Accel X: 0", this);
-    accelY = new QLabel("Accel Y: 0", this);
-    accelZ = new QLabel("Accel Z: 0", this);
-    gyroX = new QLabel("Gyro X: 0", this);
-    gyroY = new QLabel("Gyro Y: 0", this);
-    gyroZ = new QLabel("Gyro Z: 0", this);
-    mpuTemperature = new QLabel("MPU Temp: 0", this);
-
-    utcLabel = new QLabel("00:00:00", this);
-    timeLabel = new QLabel("00:00:00", this);
-
-    // telemButton = new QPushButton("&TEST", this);
+    // Initialise needed variable inside constructor
     signalMapper = new QSignalMapper(this);
 
     setupWindow();
-    setupConnections();     // Setup connections between buttons, signal maps etc.
-    setupThreads();         // Setup the thread connections
+    setupConnections();                 // Setup connections between buttons, signal maps etc.
+    setupThreads();                     // Setup the thread connections
     serialPort->openSerialPort();       // Open the serial port after connections have been established
 }
 
@@ -94,6 +77,22 @@ void MainWindow::setupSensorDataWidget()
 {
     sensorDataWidget = new QWidget(this);
     QVBoxLayout *sensorDataLayout = new QVBoxLayout(sensorDataWidget);
+
+    // Initialise labels so they are created before trying to get the actual data
+    temperature = new QLabel("Temperature: 0", this);
+    pressure = new QLabel("Pressure: 0", this);
+    altitude = new QLabel("Altitude: 0", this);
+    humidity = new QLabel("Humidity: 0", this);
+    accelX = new QLabel("Accel X: 0", this);
+    accelY = new QLabel("Accel Y: 0", this);
+    accelZ = new QLabel("Accel Z: 0", this);
+    gyroX = new QLabel("Gyro X: 0", this);
+    gyroY = new QLabel("Gyro Y: 0", this);
+    gyroZ = new QLabel("Gyro Z: 0", this);
+    mpuTemperature = new QLabel("MPU Temp: 0", this);
+
+    utcLabel = new QLabel("00:00:00", this);
+    timeLabel = new QLabel("00:00:00", this);
 
     sensorDataLayout->addWidget(temperature);
     sensorDataLayout->addWidget(pressure);
