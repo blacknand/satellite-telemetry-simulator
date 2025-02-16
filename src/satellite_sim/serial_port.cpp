@@ -179,7 +179,7 @@ bool SerialPort::isOpen()
 
 void SerialPort::writeCommand(const QString &data) 
 {
-    // std::cout << "BUTTON CLICKED" << std::endl;
+    std::cout << "BUTTON CLICKED" << std::endl;
     // std::string stdData = data.toStdString();
     // std::cout << "Command to write: " << stdData << std::endl;
     QByteArray byteArray = data.toUtf8();

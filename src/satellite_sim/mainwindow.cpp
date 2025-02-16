@@ -26,6 +26,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QPushButton>
+#include <QVariant>
 
 
 MainWindow::MainWindow(QWidget *parent) : 
@@ -134,11 +135,17 @@ void MainWindow::setupButtonWidget()
 // Button connections are handeled inside of setupConnections
 // See documentation for more information
 {
+    telemetryRate = new QComboBox(this);
+    for (const auto [key, value] : telemetryRates)
+        telemetryRate->addItem(QString::fromStdString(key), QVariant(QString::fromStdString(value))); 
+    telemetryRate->setCurrentIndex(0);
+
     buttonWidget = new QWidget(this);
     QVBoxLayout *buttonLayout = new QVBoxLayout(buttonWidget);
 
     telemButton = new QPushButton("Change telemetry collection rate", this);
     QPushButton *exampleButton2 = new QPushButton("Example Button", this);
+    buttonLayout->addWidget(telemetryRate);
     buttonLayout->addWidget(telemButton);
     buttonLayout->addWidget(exampleButton2);
 
@@ -203,9 +210,16 @@ void MainWindow::setupConnections()
 
     // When button is clicked I want to emit something like
     // [COMM] CHANGE TELEMETRY RATE TO 1.25X
-    connect(telemButton, &QPushButton::clicked, signalMapper, qOverload<>(&QSignalMapper::map));
-    signalMapper->setMapping(telemButton, "[COMM] Change telemetry rate to 1.25x");
-    connect(signalMapper, &QSignalMapper::mappedString, this, &MainWindow::changeTelemetryRateClicked);
+
+    connect(telemetryRate, &QComboBox::activated, [=](int index) {
+        QVariant data = telemetryRate->itemData(index);
+        QString command = data.toString();
+        serialPort->writeCommand(command);
+    });
+
+    // connect(telemButton, &QPushButton::clicked, signalMapper, qOverload<>(&QSignalMapper::map));
+    // signalMapper->setMapping(telemButton, "[COMM] Change telemetry rate to 1.25x");
+    // connect(signalMapper, &QSignalMapper::mappedString, this, &MainWindow::changeTelemetryRateClicked);
 }
 
 
@@ -256,7 +270,7 @@ void MainWindow::handleSatResults(const QJsonObject &data)
 
     mpuTemperature->setText("MPU Temperature: " + QString::number(mpuTemperatureData) + " °C");
 
-    // Optional: Display UTC time
+    // TODO: Add the Pico data here
     utcLabel->setText("UTC time: " + utcTime);
 }
 

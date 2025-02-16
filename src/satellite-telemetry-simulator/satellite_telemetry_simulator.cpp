@@ -94,8 +94,9 @@ void collect_telemetry() {
 
 
 void set_telemetry_delay(int new_delay) {
-    // stop_telemetry.store()
+    stop_telemetry.store(true);             // Stop
     telemetry_delay.store(new_delay);
+    stop_telemetry.store(false);            // Start
 }
 
 
@@ -124,10 +125,42 @@ int main() {
     printf("Offloading collect telemetry to core 1\n");
     multicore_launch_core1(collect_telemetry);          // Start the core 1 thread
 
+
     // Start
     stop_telemetry.store(false);
     printf("Putting main core to sleep for 5 seconds\n");
-    while (true) { sleep_ms(10000); }
+
+    char line[256];
+    int pos = 0;
+    // Core 0
+    while (true) {
+        int c = getchar_timeout_us(0);
+        if (c != PICO_ERROR_TIMEOUT) {
+            if (c == "\n") {
+                // Process complete line
+                line[pos] = '\0';
+                std::string line_str(line);
+                // 
+                if (line_str == "[COMM] Change telemetry rate to 0.5x")
+                    set_telemetry_delay(500);
+                if (line_str == "[COMM] Change telemetry rate to 1x");
+                    set_telemetry_delay(1000);
+                if (line_str == "[COMM] Change telemetry rate to 1.25x");
+                    set_telemetry_delay(1250);
+                if (line_str == "[COMM] Change telemetry rate to 1.5x");
+                    set_telemetry_delay(1500);
+                if (line_str == "[COMM] Change telemetry rate to 2x");
+                    set_telemetry_delay(2000);
+                if (line_str == "[COMM] Change telemetry rate to 2.5x"); 
+                    set_telemetry_delay(2500);
+                if (line_str == "[COMM] Change telemetry rate to 3x");
+                    set_telemetry_delay(3000);
+                pos = 0;
+            } else if (pos < sizeof(line) - 1)
+                line[pos++] = c;
+        }
+        
+    }
 
     // // Stop
     // stop_telemetry.store(true);
