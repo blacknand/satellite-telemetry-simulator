@@ -38,7 +38,7 @@ void SerialPort::openSerialPort()
 {
     if (sp_serial->isOpen()) { sp_serial->close(); }
 
-    const QString serialPortName = "/dev/tty.usbmodem1201";
+    const QString serialPortName = "/dev/tty.usbmodem11201";
     sp_serial->setPortName(serialPortName);        // macOS port, hardcoded for meantime
     sp_serial->setBaudRate(115200);
     sp_serial->setDataBits(QSerialPort::Data8);
@@ -179,9 +179,8 @@ bool SerialPort::isOpen()
 
 void SerialPort::writeCommand(const QString &data) 
 {
-    std::cout << "BUTTON CLICKED" << std::endl;
-    // std::string stdData = data.toStdString();
-    // std::cout << "Command to write: " << stdData << std::endl;
+    std::string stdData = data.toStdString();
+    std::cout << "Command to write: " << stdData << std::endl;
     QByteArray byteArray = data.toUtf8();
     sp_serial->write(byteArray);
 }

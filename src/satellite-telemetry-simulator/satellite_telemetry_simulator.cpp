@@ -79,6 +79,7 @@ json get_satellite_data() {
 void collect_telemetry() {
     while (true) {
         // Change the rate at which telemetry data is collected 
+        // Must check stop_telemetry every time so it notices if its behaviour must be changed
         if (!stop_telemetry.load()) {
             j = get_satellite_data();
             printf("START OF JSON OBJECT\n");
@@ -131,50 +132,43 @@ int main() {
     printf("Putting main core to sleep for 5 seconds\n");
 
     char line[256];
-    int pos = 0;
-    // Core 0
+    int pos = 0;  // Core 0
     while (true) {
-        int c = getchar_timeout_us(0);
+        int c = getchar_timeout_us(100000);
         if (c != PICO_ERROR_TIMEOUT) {
-            if (c == "\n") {
-                // Process complete line
-                line[pos] = '\0';
-                std::string line_str(line);
-                // 
-                if (line_str == "[COMM] Change telemetry rate to 0.5x")
-                    set_telemetry_delay(500);
-                if (line_str == "[COMM] Change telemetry rate to 1x");
-                    set_telemetry_delay(1000);
-                if (line_str == "[COMM] Change telemetry rate to 1.25x");
-                    set_telemetry_delay(1250);
-                if (line_str == "[COMM] Change telemetry rate to 1.5x");
-                    set_telemetry_delay(1500);
-                if (line_str == "[COMM] Change telemetry rate to 2x");
-                    set_telemetry_delay(2000);
-                if (line_str == "[COMM] Change telemetry rate to 2.5x"); 
-                    set_telemetry_delay(2500);
-                if (line_str == "[COMM] Change telemetry rate to 3x");
-                    set_telemetry_delay(3000);
+            if (c == '\n' || c == '\r') {
+                if (pos > 0) {  // Only process non-empty lines
+                    line[pos] = '\0';
+                    std::string line_str(line);
+                    if (!line_str.empty() && line_str.back() == '\r') {
+                        line_str.pop_back();
+                    }
+                    printf("Received: [%s]\n", line_str.c_str());
+                    fflush(stdout);  // Ensure the output is flushed immediately
+    
+                    // Process commands here...
+                    if (line_str == "[COMM] rate_change_0.5x")
+                        set_telemetry_delay(500);
+                    else if (line_str == "[COMM] rate_change_1x")
+                        set_telemetry_delay(1000);
+                    else if (line_str == "[COMM] rate_change_1.25x")
+                        set_telemetry_delay(1250);
+                    else if (line_str == "[COMM] rate_change_1.5x")
+                        set_telemetry_delay(1500);
+                    else if (line_str == "[COMM] rate_change_2x")
+                        set_telemetry_delay(2000);
+                    else if (line_str == "[COMM] rate_change_2.5x")
+                        set_telemetry_delay(2500);
+                    else if (line_str == "[COMM] rate_change_3x")
+                        set_telemetry_delay(3000);
+                    else if (line_str == "[COMM] rate_change_10x")
+                        set_telemetry_delay(10000);
+                }
                 pos = 0;
-            } else if (pos < sizeof(line) - 1)
+            } else if (pos < (int)sizeof(line) - 1) {
                 line[pos++] = c;
+            }
         }
-        
     }
-
-    // // Stop
-    // stop_telemetry.store(true);
-    // printf("Thread 1 has stopped executing collect_telemetry\n");
-
-    // // Change delay and restart collection
-    // set_telemetry_delay(3000);
-    // printf("Starting exectution on thread 1 with new delay set\n");
-    // stop_telemetry.store(false);
-    // sleep_ms(5000);
-
-    // // Stop collection
-    // stop_telemetry.store(true);
-    // printf("Thread 1 has finished executing stop_telemetry\n");
-
     return 0;    
 }

@@ -80,7 +80,8 @@ private:
         {"1.5x", "[COMM] rate_change_1.5x"},
         {"2x", "[COMM] rate_change_2x"},
         {"2.5x", "[COMM] rate_change_2.5x"},
-        {"3x", "[COMM] rate_change_3x"}
+        {"3x", "[COMM] rate_change_3x"},
+        {"10x (experimental)", "[COMM] rate_change_10x"}
     };
 
 public slots:
