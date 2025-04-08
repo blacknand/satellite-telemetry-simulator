@@ -5,7 +5,7 @@
 
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
-#include "pico/mutex.h"         // ?
+// #include "pico/mutex.h"         // ?
 
 #include "satellite_telemetry_simulator.h"
 #include "set_telemetry.h"
@@ -131,6 +131,8 @@ int main() {
     stop_telemetry.store(false);
     printf("Putting main core to sleep for 5 seconds\n");
 
+    // NOTE: When WIFI is implemented this method of polling will not work
+    // probably will have to do it with sockets or something similar (thinking ZeroMQ or some Boost library)
     char line[256];
     int pos = 0;  // Core 0
     while (true) {
@@ -146,7 +148,6 @@ int main() {
                     printf("Received: [%s]\n", line_str.c_str());
                     fflush(stdout);  // Ensure the output is flushed immediately
     
-                    // Process commands here...
                     if (line_str == "[COMM] rate_change_0.5x")
                         set_telemetry_delay(500);
                     else if (line_str == "[COMM] rate_change_1x")

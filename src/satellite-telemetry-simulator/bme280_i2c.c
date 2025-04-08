@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
@@ -147,6 +149,14 @@ static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *tempe
 }
 
 
+float calculate_altitude(float pressure, float sea_lvl_pressure) {
+    // let P = current pressure from sensor
+    // let P0 = sea level standard atmospheric pressure = ~1013.25 hPa
+    // altitude (m)=44330⋅(1−(P / P0) ^ 1 / 5.255)
+    return 44330.0 * (1.0 - pow(pressure / sea_lvl_pressure, 0.1903));
+}
+
+
 void bme280_init() {
 #if !defined(i2c_default) || !defined(PICO_DEFAULT_I2C_SDA_PIN) || !defined(PICO_DEFAULT_I2C_SCL_PIN)
     #warning bme280_i2c.c requires a board with I2C pins
@@ -209,6 +219,7 @@ struct BME280Data get_bme_data() {
     data.humidity = compensate_humidity(humidity) / 1024.0;
     data.pressure = compensate_pressure(pressure) / 100.0;
     data.temperature = compensate_temp(temperature) / 100.0;
+    data.altitude = calculate_altitude(data.pressure, 1013.25);
 
     return data;
 }

@@ -1,2 +1,9 @@
 build
 json.hpp
+kalman_filter.aux
+kalman_filter.tex
+kalman_filter.pdf
+kalman_filter.log
+kalman_filter.synctex.gz
+pico_sdk_import.cmake
+notes.md
