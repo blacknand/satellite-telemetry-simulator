@@ -53,6 +53,7 @@ project(satellite-telemetry-simulator C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+
 # Add executable. Default name is the project name, version 0.1
 
 add_executable(satellite-telemetry-simulator 
@@ -89,6 +90,8 @@ target_link_libraries(satellite-telemetry-simulator
         hardware_clocks
         pico_cyw43_arch_lwip_threadsafe_background
         nlohmann_json::nlohmann_json
+        pico_multicore
+        pico_sync
 )
 
 

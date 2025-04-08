@@ -276,7 +276,7 @@ struct MPUDataStruct mpu6050_get_data() {
     for (int i = 0; i < 3; i++) {
         // printf("Accel[%d]: %d\n", i, acceleration[i]);
         // printf("Gyro[%d]: %d\n", i, gyro[i]);
-        return_data.acceleration[i] = acceleration[i];
+        return_data.acceleration[i] = (float)acceleration[i] / 16384.0f * 9.81f; // Raw LSB to m/s^2
         return_data.gyro[i] = gyro[i];
     }
     return_data.temp = (temp / 340.0) + 36.53;

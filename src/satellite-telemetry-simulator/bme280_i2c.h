@@ -18,6 +18,7 @@ struct BME280Data {
 int32_t compensate_temp(int32_t adc_T);
 uint32_t compensate_pressure(int32_t adc_P);
 uint32_t compensate_humidity(int32_t adc_H);
+float calculate_altitude(float pressure, float sea_lvl_pressure);
 void read_compensation_parameters();
 static void bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *temperature);
 void bme280_init();

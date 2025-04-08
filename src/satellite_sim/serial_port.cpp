@@ -38,14 +38,16 @@ void SerialPort::openSerialPort()
 {
     if (sp_serial->isOpen()) { sp_serial->close(); }
 
-    sp_serial->setPortName("/dev/tty.usbmodem1101");        // macOS port, hardcoded for meantime
+    const QString serialPortName = "/dev/tty.usbmodem11201";
+    sp_serial->setPortName(serialPortName);        // macOS port, hardcoded for meantime
     sp_serial->setBaudRate(115200);
     sp_serial->setDataBits(QSerialPort::Data8);
     sp_serial->setParity(QSerialPort::NoParity);
     sp_serial->setStopBits(QSerialPort::OneStop);
     sp_serial->setFlowControl(QSerialPort::NoFlowControl);
 
-    std::cout << "serial port /dev/tty.usbmodem1101 opened" << std::endl;
+    std::string portName = serialPortName.toStdString();
+    std::cout << "serial port " << portName << " opened" << std::endl;
 
     if (!sp_serial->open(QIODevice::ReadWrite)) 
         emit errorOccurred(sp_serial->errorString());
@@ -60,6 +62,37 @@ void SerialPort::closeSerialPort()
 
 void SerialPort::readData()
 {
+    /*
+    A JSON object will look like this:
+    START OF JSON OBJECT
+    {
+        "sensor_data": {
+            "accelerometer": {
+                "accel_x": -12,
+                "accel_y": 46,
+                "accel_z": 16432
+            },
+            "environment": {
+                "altitude (m)": -858547940,
+                "humidity (%)": 39,
+                "pressure (hPa)": 1021,
+                "temperature (*C)": 26
+            },
+            "gyroscope": {
+                "gyro_x": 13,
+                "gyro_y": -2,
+                "gyro_z": 27
+            },
+            "sensor_meta_data": {
+                "mpu_temperature": 27
+            }
+        },
+        "utc_data": {
+            "UTC time": "UTC time: 1970-1-1T0:1:1\n"
+        }
+    }
+    END OF JSON OBJECT
+    */
     while (true) {
         // Find the start of a JSON object
         int startIndex = dataBuffer.indexOf("START OF JSON OBJECT");
@@ -141,4 +174,13 @@ void SerialPort::handleError(QSerialPort::SerialPortError error)
 bool SerialPort::isOpen() 
 {
     return sp_serial->isOpen();
+}
+
+
+void SerialPort::writeCommand(const QString &data) 
+{
+    std::string stdData = data.toStdString();
+    std::cout << "Command to write: " << stdData << std::endl;
+    QByteArray byteArray = data.toUtf8();
+    sp_serial->write(byteArray);
 }

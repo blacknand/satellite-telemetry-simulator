@@ -5,14 +5,22 @@
 #include "serial_port.h"
 #include "pico_flasher.h"
 
+// C++ header files
+#include <nlohmann/json.hpp>
+#include <map>
+
+// Qt specific header files
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QJsonDocument>
 #include <QLabel>
 #include <QThread>
 #include <QString>
-#include <nlohmann/json.hpp>
 #include <QJsonObject>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QSignalMapper>
+#include <QComboBox>
 
 
 using json = nlohmann::json;
@@ -28,7 +36,11 @@ public:
 public:
     void setupThreads();
     void setupWindow();
+    void setupConnections();
     void setupSensorDataWidget();
+    void setupConsolesWidget();
+    void setupButtonWidget();
+    void setup3dWidget();
 private:
     QPlainTextEdit *sensorData;
     SerialPort *serialPort;
@@ -46,8 +58,32 @@ private:
     QLabel *gyroZ;
     QLabel *mpuTemperature;
     QLabel *utcLabel;
-private:
+
+    QLabel *errorTerminal;
+    QLabel *outputTerminal;
+
+    QPushButton *telemButton;
+    
     QWidget *sensorDataWidget;
+    QWidget *buttonWidget;
+    QWidget *satellite3dWidget;
+    QHBoxLayout *consolesLayout;    
+
+    QComboBox *telemetryRate;
+
+    QSignalMapper *signalMapper;
+
+    std::map<std::string, std::string> telemetryRates = {
+        {"0.5x", "[COMM] rate_change_0.5x"},
+        {"1x", "[COMM] rate_change_1x"},
+        {"1.25x", "[COMM] rate_change_1.25x"},
+        {"1.5x", "[COMM] rate_change_1.5x"},
+        {"2x", "[COMM] rate_change_2x"},
+        {"2.5x", "[COMM] rate_change_2.5x"},
+        {"3x", "[COMM] rate_change_3x"},
+        {"10x (experimental)", "[COMM] rate_change_10x"}
+    };
+
 public slots:
     void handleSatResults(const QJsonObject &data);
     void handleTimeResults(const QString &time);
@@ -57,6 +93,7 @@ public slots:
 signals:
     void startSatThread();
     void startTimeThread();
+    void changeTelemetryRateClicked(const QString &data);
 };
 
 #endif // MAINWINDOW_H
