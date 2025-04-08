@@ -1,34 +1,133 @@
 > [!WARNING]
 > This project is still in active development. It is not ready for release
 # Satellite simulator app
-A desktop app for simulating the way that telemetry data is collected from a orbital satellite and analysed/processed by ground stations. The simulators interface enables you to view a 3D model of the satellite by using the data from the accelerometer and gyroscope to map a 3D model. You can also send signals to the satellite the same way a real life ground station can (i.e. interrupt signals etc). The code for collecting the data from the sensors are calibrated to ensure the accuracy and consistency of the data using various filters such as a [kalman filter](https://en.wikipedia.org/wiki/Kalman_filter) to average and correct the data while still collecting data having the affect of the data becoming more accurate as it collects more data. The satellite (Pico W) communicates wirelessley with the laptop (ground station) using TCP and UDP over Wi-Fi.
-## Filtering
-To enable custom filtering and ensuring the data is as accurate as possible, there are several types of filtering involved. First both sensors code is written from scratch with the generated Pico SDK examples as a starting point and then a calabration process occurs automatically every time the app is started. These calibration values are then written to the registers of the sensors and then the offset values are calculated, adjusted and written back to the sensors to account for any noise coming from the sensors that is caused by any issues when the sensors were manufactured. Finally a Kalman filter is applied to both sensors to make sure the sensors are as accurate as possible by averaging and correct the data as more data is collected which makes the data more accurate as it goes on. A Kalman filter is a perfect candidate for a filtering algorithim in this project because the Kalmnan filter is used in all spaceflight, aerospace, IoT and computer vision projects. It was also used on the Apollo missions!
-## Wireless communication over Wi-Fi
-Ideally I would have done this part using an actual satellite communication protocol but that is not possible so I instead use UDP and TCP over Wi-Fi to communicate the data and then sockets to collect that data. Data is transmitted as a JSON object to ensure data is collected from the serial port and packaged reliably. 
-## Signals and command protocol
-There are various signals and commands you can send to the satellite to add an element of realism. These include:
-- Shutdown signal
-- Restart signal
-- Calibrate satellite signal
-- Change the telemetry transmission rate
-- Toggle a system mode (low power or high power)
-## The telemetry data
-There are various data points collected:
-- Acceleromter data on 3 axis
-- Gyroscopic data on 3 axis
-- MPU sensor temperature
-- Enviromental temperature
-- Altitude
-- Barometric (atmospheric) pressure
-- Humidity
-- UTC time
-- Pico W conditions
-## 3D satellite model
-Using the gyroscopic and accelerometer data a 3D model of a satellite is mapped and you can view it in 3 axis.
-## The physical setup
-The "satellite" is a Pico W connected to a MPU6050 accelerometer and gyroscopic sensor with a BME280 enviromental sensor. The telemetry data consists of the data from these sensors as well as the Pico W statistics and health such as temperature, available RAM, CPU usage etc. To see the specific hardware wirings please either see the docs or the `src/satellite-telemetry-simulator` directory.
-## The build system
-This project has got 2 CMake builds, one for the Qt app and one for the sensor code using the Pico SDK. This keeps the build systems seperate and reduces the complexity enabling you to easily build both projects and then run the entire project via the Qt app. To see more information please see the `src` directory. The good thing about this app is you only have to build the Qt app and then the Qt app handles the built process for the Pico SDK for you, the app also sends commands to use `Picotool` to automatically flash the UF2 file to the Pico W and then monitor the serial port.
-## Docs
-This project has pretty extensive and detailed documentation. Because it is such a complex project (requires you to have the same setup to clone this and run on your local machine) you can see diagrams and videos explaning this project, the build system, the setup and anything else needed.
+macOS/Linux app that simulates the way a orbital satellite collects and relays telemetry data wirelessley. The project hardware consists of a Raspberry Pi Pico W, a MPU6050 MEMS device and a BME280 enviromental sensor.
+## Roadmap
+This project is actively under development, this roadmap lays out every feature currently implemented and every feature that I am planning to implement.
+### ✅ Core System Architecture
+
+- [x] Set up Raspberry Pi Pico W as the central microcontroller  
+- [x] Integrate BME280 sensor for temperature, humidity, and pressure  
+- [x] Integrate MPU6050 for gyroscope and accelerometer data  
+- [x] Output raw sensor data at fixed intervals (e.g., every 100 ms)  
+- [x] Format sensor data as JSON  
+- [x] Send JSON data to the GUI for visualization  
+- [x] Filter and display individual telemetry values
+
+---
+
+### ✅ Advanced Filtering & Data Processing
+
+- [x] Implement basic Kalman filter for noisy sensor fusion  
+- [ ] Tune Kalman filter parameters for real-time accuracy  
+- [ ] Explore complementary filters as a comparison  
+- [ ] Add quaternion or DCM-based orientation estimation (for 3D satellite rotation)  
+- [ ] Implement anomaly detection (e.g., using thresholds or ML)  
+- [ ] Add historical trend tracking (e.g., rolling averages, plotting over time)
+
+---
+
+### 🔧 Embedded Systems Engineering
+
+- [x] Multi-threaded sensor reading and data transmission  
+- [ ] Add basic command handling (receive commands from base station/GUI)  
+- [ ] Log telemetry data to SD card or external storage (optional)  
+- [ ] Implement power and thermal management simulation (mock or real)  
+- [ ] Output Pico system status: CPU temp, memory usage, uptime  
+
+---
+
+### 💻 Qt GUI Interface
+
+- [x] Create GUI to display live telemetry values  
+- [x] Format GUI with SpaceX-style theme  
+- [ ] Add 2D/3D satellite visualization (orientation from MPU6050)  
+- [ ] Add live charts for sensor data (temperature, orientation, etc.)  
+- [ ] Build a command interface to send instructions to the Pico  
+- [ ] Add simulation start/stop/reset buttons  
+- [ ] Create error or warning overlays (e.g., when a value is out of range)
+
+---
+
+### 📡 Communication Layer
+
+- [ ] Enable wireless communication between Pico W and laptop (ESP-NOW, MQTT, or TCP)  
+- [ ] Implement command+response protocol between ground station and satellite  
+- [ ] Add simulated latency, packet loss or corruption (for realism)  
+- [ ] Encrypt telemetry and command channels (TLS or basic XOR as a placeholder)
+
+---
+
+### 🧠 FPGA Integration
+
+- [ ] Port Kalman filter to HDL (VHDL/Verilog) for testbench use  
+- [ ] Simulate real-time telemetry stream into FPGA  
+- [ ] Develop Pico-compatible SPI or UART HDL module  
+- [ ] Demonstrate FPGA acting as telemetry decoder or command relay  
+- [ ] Optimize filtering or sensor processing with HLS tools (e.g., Xilinx Vivado HLS)
+
+---
+
+### 🧪 Testing & Reliability
+
+- [ ] Add unit tests for each telemetry parsing and filtering module  
+- [ ] Add GUI integration tests (e.g., simulate incoming data)  
+- [ ] Create test suite with recorded sensor data playback  
+- [ ] Implement data validation and CRC error checking  
+- [ ] Track uptime and unexpected resets of the Pico system
+
+---
+
+### 🎯 UX Polish & Deployment
+
+- [ ] Package the entire Qt GUI into a cross-platform app  
+- [ ] Automate Pico firmware uploads using `picotool` on app startup  
+- [ ] Provide user-friendly error messages and fallback mechanisms  
+- [ ] Create README, user manual, and demo video  
+- [ ] Add simulation presets (e.g., satellite in orbit, spin-stabilized, tumbling)
+
+---
+
+### 📁 Optional Expansion Ideas
+
+- [ ] Add GPS module (simulate real satellite movement)  
+- [ ] Use ROS2 for more complex satellite-ground station messaging  
+- [ ] Add support for CAN bus protocol 
+
+---
+## Setup/building
+See the [`docs`](https://github.com/blacknand/satellite-telemetry-simulator/tree/main/docs) for the physical sensor and Pico setup. The project consists of two seperate CMake builds, to keep the embedded systems side and the app side seperate.
+### Building for the Pico SDK
+The embedded systems/hardware site of the project uses the Pico SDK for low level memory access and manipulation as well as extreme efficiency and speed gains. The easiest way to build therefore is to use the VSCode Pico extension. To enable this, do the following:
+1. Copy `pico_sdk_import.cmake` into project directory
+2. Set `PICO_SDK_PATH` to location of Pico SDK, probably in `~/.pico-sdk/pico-sdk`
+3. Inlcude `pico_sdk_import.cmake` before cretating project inside of CMake list
+
+
+Should you encounter any errors, try to first build the project manually rather than using the VSCode extension.
+- To build for the Pico:
+```bash
+cd build
+rm -rf *
+cmake -DPICO_SDK_PATH=$PICO_SDK_PATH ..
+make
+```
+
+### Building for the Qt app
+The app is a Qt app, which is slightly simpler to build for:
+- Set `CMAKE_PREFIX_PATH` to point to Qt installation
+
+    ```bash
+    cmake -B build -S . -DCMAKE_PREFIX_PATH=/Users/<your username>/Qt/6.8.1/macos
+    ```
+
+- Build
+
+    ```bash
+    cmake --build build
+    ```
+
+- Run 
+
+    ```bash
+    ./build/satellite_sim.app/Contents/MacOS/satellite_sim
