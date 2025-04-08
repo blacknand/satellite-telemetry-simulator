@@ -1,0 +1,89 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{array}
+
+\begin{document}
+
+\title{Application of the Kalman Filter to a Satellite Simulator to Predict Orbital Position}
+\author{Nathan Blackburn--blacknand}
+\maketitle
+
+\[
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} & a_{14} & a_{15} & a_{16} \\
+a_{21} & a_{22} & a_{23} & a_{24} & a_{25} & a_{26} \\
+a_{31} & a_{32} & a_{33} & a_{34} & a_{35} & a_{36} \\
+a_{41} & a_{42} & a_{43} & a_{44} & a_{45} & a_{46} \\
+a_{51} & a_{52} & a_{53} & a_{54} & a_{55} & a_{56} \\
+a_{61} & a_{62} & a_{63} & a_{64} & a_{65} & a_{66}
+\end{bmatrix}
+\]
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|p{4cm}|c|p{6cm}|}
+        \hline
+        \textbf{Symbol} & \textbf{Description} & \textbf{Dimensions} & \textbf{Role} \\
+        \hline
+        \( x \) & State variable & \( n \times 1 \) column vector & Output \\
+        \hline
+        \( P \) & State covariance matrix & \( n \times n \) matrix & Output \\
+        \hline
+        \( z \) & Measurement & \( m \times 1 \) column vector & Input \\
+        \hline
+        \( A \) & State transition matrix & \( n \times n \) matrix & System Model \\
+        \hline
+        \( H \) & State-to-measurement matrix & \( n \times n \) matrix & System Model \\
+        \hline
+        \( R \) & Measurement covariance matrix & \( m \times m \) matrix & Input \\
+        \hline
+        \( Q \) & Process noise covariance matrix & \( n \times n \) matrix & System Model \\
+        \hline
+        \( K \) & Kalman Gain & \( n \times m \) & Internal \\
+        \hline
+    \end{tabular}
+    \caption{System variables, matrices, and their roles in the Kalman Filter}
+    \label{tab:kalman_variables}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|p{6cm}|p{6cm}|}
+        \hline
+        \textbf{Symbol} & \textbf{Name} & \textbf{Description} & \textbf{Example} \\
+        \hline
+        \( x_k \) & State Vector & The current estimate of the system’s state at time \( k \). & \( x_k = [px, py, pz, vx, vy, vz]^\text{T} \) (6x1 column: position in meters, velocity in m/s). \\
+        \hline
+        \( \hat{x}_k \) & Predicted State & The predicted state at time \( k \) before incorporating sensor measurements. & Same 6x1 vector, e.g., \( [0, 0, 0, 0, 0, 9] \) after predicting with \( \text{accel}_z = 9 \, \text{m/s}^2 \) for 1s. \\
+        \hline
+        \( z_k \) & Measurement Vector & The sensor’s observation at time \( k \). & \( z_k = [vx, vy, vz] \) (3x1), approximated from accel (e.g., \( [0, 0, 0] \) if stationary). \\
+        \hline
+        \( F \) & State Transition Matrix & Describes how the state evolves over time without external inputs. & 6x6 matrix: \\
+        & & \( \begin{bmatrix} 1 & 0 & 0 & \Delta t & 0 & 0 \\ 0 & 1 & 0 & 0 & \Delta t & 0 \\ 0 & 0 & 1 & 0 & 0 & \Delta t \\ 0 & 0 & 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 \end{bmatrix} \) & (position grows with velocity). \\
+        \hline
+        \( B \) & Control Input Matrix & Maps the control input to the state. & 6x3 matrix: \\
+        & & \( \begin{bmatrix} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \\ \Delta t & 0 & 0 \\ 0 & \Delta t & 0 \\ 0 & 0 & \Delta t \end{bmatrix} \) & (accel affects velocity). \\
+        \hline
+        \( u_k \) & Control Vector & The external input affecting the system at time \( k \). & \( u_k = [ax, ay, az]^T \) (3x1), e.g., \( [0, 0, 9] \) from MPU6050 in \( \text{m/s}^2 \). \\
+        \hline
+        \( H \) & Observation Matrix & Relates the state to the measurement. & 3x6 matrix: \\
+        & & \( \begin{bmatrix} 0 & 0 & 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 \end{bmatrix} \) & (picks velocities from state). \\
+        \hline
+        \( P_k \) & Covariance Matrix & Represents the uncertainty in the state estimate at time \( k \). & 6x6 matrix, e.g., diagonal starts at 1000 (high uncertainty), adjusts with each step. \\
+        \hline
+        \( Q \) & Process Noise Covariance & Uncertainty added during prediction due to model imperfections. & 6x6 matrix, e.g., diagonal \( [0.01, 0.01, 0.01, 0.1, 0.1, 0.1] \) (small noise for pos, vel). \\
+        \hline
+        \( R \) & Measurement Noise Covariance & Uncertainty in the sensor measurements. & 3x3 matrix, e.g., diagonal \( [1.0, 1.0, 1.0] \) (noise in accel-derived velocity). \\
+        \hline
+        \( K \) & Kalman Gain & Determines how much to trust the measurement vs. the prediction. & 6x3 matrix, computed to balance \( P \) and \( R \), e.g., 0.5 means half-trust in sensor. \\
+        \hline
+        \( w_k \) & Process Noise & Random errors in the system model (assumed Gaussian). & Handled by \( Q \), e.g., accel jitter or unmodeled effects. \\
+        \hline
+        \( v_k \) & Measurement Noise & Random errors in the sensor data (assumed Gaussian). & Handled by \( R \), e.g., noise in MPU6050 accel readings. \\
+        \hline
+    \end{tabular}
+    \caption{Kalman Filter Variables and Examples}
+    \label{tab:kalman_examples}
+\end{table}
+
+\end{document}
