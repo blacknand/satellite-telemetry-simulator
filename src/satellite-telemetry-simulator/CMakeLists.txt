@@ -60,6 +60,7 @@ add_executable(satellite-telemetry-simulator
                 satellite_telemetry_simulator.cpp
                 mpu6050_i2c.c
                 bme280_i2c.c
+                kalman_filter.cpp
                 # pico_satellite_factory.cpp
                 ../data_preprocessing/json_conversion.cpp
                 ../common/utc_data.cpp

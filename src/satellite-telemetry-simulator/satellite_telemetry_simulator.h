@@ -14,6 +14,7 @@
 #include "../common/utc_data.h"
 #include "../common/satellite_data.h"
 #include "../data_preprocessing/json_conversion.h"
+#include "kalman_filter.h"
 
 
 using json = nlohmann::json;
@@ -28,5 +29,8 @@ extern SatelliteData satellite_data;
 extern MPUDataStruct _mpu_data_struct;
 extern json j;
 extern bool calibrated;
+extern KalmanState kf_state;    
+extern KalmanFilter kf;         
+extern bool kf_initialized;    
 
 #endif  // SATELLITE_TELEMETRY_SIMULATOR_H

@@ -10,6 +10,7 @@
 #include "satellite_telemetry_simulator.h"
 #include "set_telemetry.h"
 #include "../common/satellite_data.h"
+#include "kalman_filter.h"
 
 
 json j;
@@ -32,9 +33,9 @@ json get_satellite_data() {
     satellite_data.accel_x = _mpu_data_struct.acceleration[0];
     satellite_data.accel_y = _mpu_data_struct.acceleration[1];
     satellite_data.accel_z = _mpu_data_struct.acceleration[2];
-    satellite_data.gyro_x = _mpu_data_struct.gyro[1];
-    satellite_data.gyro_y = _mpu_data_struct.gyro[2];
-    satellite_data.gyro_z = _mpu_data_struct.gyro[3];
+    satellite_data.gyro_x = _mpu_data_struct.gyro[0];
+    satellite_data.gyro_y = _mpu_data_struct.gyro[1];
+    satellite_data.gyro_z = _mpu_data_struct.gyro[2];
 
     satellite_data.temperature = bme280_data.temperature;
     satellite_data.pressure = bme280_data.pressure;
@@ -78,19 +79,28 @@ json get_satellite_data() {
 
 void collect_telemetry() {
     while (true) {
-        // Change the rate at which telemetry data is collected 
-        // Must check stop_telemetry every time so it notices if its behaviour must be changed
         if (!stop_telemetry.load()) {
             j = get_satellite_data();
+            SatelliteData local_data;
+            local_data.accel_x = _mpu_data_struct.acceleration[0];
+            local_data.accel_y = _mpu_data_struct.acceleration[1];
+            local_data.accel_z = _mpu_data_struct.acceleration[2];
+            float accel[3] = {local_data.accel_x, local_data.accel_y, local_data.accel_z};
+            kalman_predict(&kf_state, &kf, accel);
+            float measured_v[3] = {0, 0, 0}; // Assume stationary for now
+            kalman_update(&kf_state, &kf, measured_v);
             printf("START OF JSON OBJECT\n");
             printf("%s\n", j.dump(4).c_str());
-            printf("END OF JSON OBJECT\n"); 
-            sleep_ms(telemetry_delay.load());   // Use the dynamic delay
-        }  else {
-            // If stopped just yield idle CPU time at 100 ms 
-            sleep_ms(100); 
+            printf("Kalman: px=%.2f, py=%.2f, pz=%.2f, vx=%.2f, vy=%.2f, vz=%.2f\n",
+                   kf_state.state[0], kf_state.state[1], kf_state.state[2],
+                   kf_state.state[3], kf_state.state[4], kf_state.state[5]);
+            fflush(stdout);
+            printf("END OF JSON OBJECT\n");
+            sleep_ms(telemetry_delay.load());
+        } else {
+            sleep_ms(100);
         }
-    }    
+    }
 }
 
 
@@ -111,6 +121,9 @@ int main() {
     bme280_init();
     calibrated = true;
     j = get_satellite_data();
+
+    init_kalman(&kf_state, &kf, telemetry_delay.load() / 1000.0f);
+    kf_initialised = true;
 
     /**
      * The Pico W has 2 cores, core 0 and core 1. Obviously core 0 is used for the main thread of execution

@@ -23,6 +23,10 @@ typedef struct {
 } KalmanFilter;
 
 
+extern KalmanState kf_state;
+extern KalmanFilter kf;
+extern bool kf_initialised;
+
 void init_kalman(KalmanState* state, KalmanFilter* kf, float dt);
 void kalman_predict(KalmanState* state, KalmanFilter* kf, float accel[3]);
 void kalman_update(KalmanState* state, KalmanFilter* kf, float measured_v[3]);
