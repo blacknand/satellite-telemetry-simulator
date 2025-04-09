@@ -130,8 +130,3 @@ for (int i = 0; i < 6; i++) {
     }
 }
 ```
-
-## Key maths calculations
-`let x = 
-- New state: `x = F * x + B * u`
-
