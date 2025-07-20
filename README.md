@@ -1,5 +1,5 @@
 > [!WARNING]
-> This project is still in active development. It is not ready for release
+> This project is no longer being developed it. It is in a usable state, and the core system architecture is finished but it is ultimately a multi-year long passion project and there is 0 benefit to me continuing. Perhaps some time in the future I will finish it but more likely not.
 # Satellite simulator app
 macOS/Linux app that simulates the way a orbital satellite collects and relays telemetry data wirelessley. The project hardware consists of a Raspberry Pi Pico W, a MPU6050 MEMS device and a BME280 enviromental sensor.
 ## Roadmap
